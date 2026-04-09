@@ -5,7 +5,7 @@ import {
   InputBase,
   SIGNED_NUMBER_REGEX,
 } from "~~/components/scaffold-stark";
-import { useGlobalState } from "~~/services/store/store";
+import { useNativeCurrencyPriceDirect } from "~~/hooks/scaffold-stark/useNativeCurrencyPrice";
 
 const MAX_DECIMALS_USD = 2;
 
@@ -65,13 +65,13 @@ export const StarkInput = ({
 }: CommonInputProps & { usdMode?: boolean }) => {
   const [transitoryDisplayValue, setTransitoryDisplayValue] =
     useState<string>();
-  const currencyPrice = useGlobalState((state) => state.nativeCurrencyPrice);
-  const [internalUsdMode, setInternalUSDMode] = useState(
-    currencyPrice > 0 ? Boolean(usdMode) : false,
-  );
-
+  const [internalUsdMode, setInternalUSDMode] = useState<boolean>(!!usdMode);
+  const { data: currencyPriceData } = useNativeCurrencyPriceDirect();
+  const currencyPrice = currencyPriceData ?? 0;
   useEffect(() => {
-    setInternalUSDMode(currencyPrice > 0 ? Boolean(usdMode) : false);
+    if (currencyPrice > 0) {
+      setInternalUSDMode(currencyPrice > 0 ? Boolean(usdMode) : false);
+    }
   }, [usdMode, currencyPrice]);
 
   const displayValue = useMemo(() => {

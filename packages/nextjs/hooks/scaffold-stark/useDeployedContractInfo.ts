@@ -5,10 +5,9 @@ import {
   ContractCodeStatus,
   ContractName,
   Contract,
-  contracts,
+  getContractForNetwork,
 } from "~~/utils/scaffold-stark/contract";
-import { BlockIdentifier } from "starknet";
-import { useProvider } from "@starknet-start/react";
+import { useSDKStore } from "~~/services/store/sdk";
 import { ContractClassHashCache } from "./ContractClassHashCache";
 
 /**
@@ -23,37 +22,39 @@ import { ContractClassHashCache } from "./ContractClassHashCache";
  *   - raw: Contract<TContractName> | undefined - The raw contract configuration data regardless of deployment status
  *   - status: ContractCodeStatus - The deployment status (LOADING, DEPLOYED, NOT_FOUND)
  */
-export const useDeployedContractInfo = <TContractName extends ContractName>(
+export function useDeployedContractInfo<TContractName extends ContractName>(
   contractName: TContractName,
-) => {
+) {
   const isMounted = useIsMounted();
   const { targetNetwork } = useTargetNetwork();
-  const deployedContract = contracts?.[targetNetwork.network]?.[
-    contractName as ContractName
-  ] as Contract<TContractName>;
+  const networkKey = targetNetwork.network as string;
+  const deployedContract = getContractForNetwork(networkKey, contractName);
   const [status, setStatus] = useState<ContractCodeStatus>(
     ContractCodeStatus.LOADING,
   );
-  const { provider: publicClient } = useProvider();
 
   useEffect(() => {
     const checkContractDeployment = async () => {
-      if (!deployedContract) {
+      // Skip RPC call if address is null/undefined
+      if (!deployedContract?.address) {
         setStatus(ContractCodeStatus.NOT_FOUND);
         return;
       }
+
+      const sdk = useSDKStore.getState().getSDK();
+      const publicClient = sdk.getProvider();
 
       const classHashCache = ContractClassHashCache.getInstance();
       const contractClassHash = await classHashCache.getClassHash(
         publicClient,
         deployedContract.address,
-        "latest" as BlockIdentifier,
+        "latest",
       );
 
       if (!isMounted()) {
         return;
       }
-      // If contract code is `0x` => no contract deployed on that address
+      // If contract code is undefined => no contract deployed on that address
       if (contractClassHash == undefined) {
         setStatus(ContractCodeStatus.NOT_FOUND);
         return;
@@ -62,7 +63,7 @@ export const useDeployedContractInfo = <TContractName extends ContractName>(
     };
 
     checkContractDeployment();
-  }, [isMounted, contractName, deployedContract, publicClient]);
+  }, [isMounted, contractName, deployedContract]);
 
   return {
     data: status === ContractCodeStatus.DEPLOYED ? deployedContract : undefined,
@@ -70,4 +71,4 @@ export const useDeployedContractInfo = <TContractName extends ContractName>(
     raw: deployedContract,
     status,
   };
-};
+}

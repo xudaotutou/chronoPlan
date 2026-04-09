@@ -4,15 +4,14 @@ import { useInterval } from "usehooks-ts";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
 import scaffoldConfig from "~~/scaffold.config";
 import { replacer } from "~~/utils/scaffold-stark/common";
-import { Abi, ExtractAbiEventNames } from "abi-wan-kanabi/dist/kanabi";
+import { Abi, ExtractAbiEventNames } from "abi-wan-kanabi/kanabi";
 import {
   ContractAbi,
   ContractName,
   UseScaffoldEventHistoryConfig,
 } from "~~/utils/scaffold-stark/contract";
-import { devnet } from "@starknet-start/chains";
-import { useProvider } from "@starknet-start/react";
 import { RpcProvider } from "starknet";
+import { useSDKStore } from "~~/services/store/sdk";
 import { parseEventData } from "~~/utils/scaffold-stark/eventsData";
 import { buildEventKeys } from "~~/utils/scaffold-stark/eventKeyFilter";
 import {
@@ -71,6 +70,8 @@ export const useScaffoldEventHistory = <
   TReceiptData
 >) => {
   const [events, setEvents] = useState<any[]>();
+  // Use ref to avoid stale closure in readEvents
+  const eventsRef = useRef<any[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [fromBlockUpdated, setFromBlockUpdated] = useState<bigint>(fromBlock);
@@ -78,14 +79,17 @@ export const useScaffoldEventHistory = <
 
   const { data: deployedContractData, isLoading: deployedContractLoading } =
     useDeployedContractInfo(contractName);
-  const { provider } = useProvider();
   const { targetNetwork } = useTargetNetwork();
+  const [publicClient, setPublicClient] = useState<RpcProvider | null>(null);
 
-  const publicClient = useMemo(() => {
-    return new RpcProvider({
-      nodeUrl: targetNetwork.rpcUrls.public.http[0],
-    });
-  }, [targetNetwork.rpcUrls.public.http]);
+  useEffect(() => {
+    setPublicClient(useSDKStore.getState().getSDK().getProvider());
+  }, []);
+
+  // Keep ref in sync with state to avoid stale closure
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   // Get back event full name
   const eventAbi = useMemo(() => {
@@ -99,13 +103,13 @@ export const useScaffoldEventHistory = <
   }
   const fullName = eventAbi?.name;
 
-  const readEvents = async (fromBlock?: bigint) => {
+  const readEvents = async (fromBlockArg?: bigint) => {
     if (!enabled) {
       setIsLoading(false);
       return;
     }
 
-    if (isFetchingRef.current) {
+    if (!publicClient) {
       return;
     }
     isFetchingRef.current = true;
@@ -125,21 +129,22 @@ export const useScaffoldEventHistory = <
       const blockNumber = await getLatestAcceptedBlockNumber(publicClient);
 
       if (
-        (fromBlock && blockNumber >= fromBlock) ||
+        (fromBlockArg && blockNumber >= fromBlockArg) ||
         blockNumber >= fromBlockUpdated
       ) {
         const keys = buildEventKeys(
           eventName as string,
           filters as any,
           eventAbi as any,
-          deployedContractData.abi as any,
-          MAX_KEYS_COUNT,
+          deployedContractData?.abi as any,
         );
         const rawEventResp = await publicClient.getEvents({
           chunk_size: 100,
           keys,
-          address: deployedContractData?.address,
-          from_block: { block_number: Number(fromBlock || fromBlockUpdated) },
+          address: deployedContractData?.address as `0x${string}` | undefined,
+          from_block: {
+            block_number: Number(fromBlockArg || fromBlockUpdated),
+          },
           to_block: { block_number: Number(blockNumber) },
         });
         if (!rawEventResp) {
@@ -164,14 +169,15 @@ export const useScaffoldEventHistory = <
             return { event: eventAbi, log, block, transaction, receipt };
           }),
         );
-        if (events && typeof fromBlock === "undefined") {
-          setEvents([...enriched, ...events]);
+        // Use ref to get latest events value (avoids stale closure)
+        if (eventsRef.current && typeof fromBlockArg === "undefined") {
+          setEvents([...enriched, ...eventsRef.current]);
         } else {
           setEvents(enriched);
         }
         setError(undefined);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       setEvents(undefined);
       setError(e instanceof Error ? e : new Error(String(e)));
@@ -182,7 +188,9 @@ export const useScaffoldEventHistory = <
   };
 
   useEffect(() => {
-    readEvents(fromBlock).then();
+    readEvents(fromBlock).catch((err) => {
+      console.warn("[useScaffoldEventHistory] Failed to read events:", err);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromBlock, enabled]);
 
@@ -202,16 +210,15 @@ export const useScaffoldEventHistory = <
 
   useEffect(() => {
     if (!deployedContractLoading && (!watch || !wsConnected)) {
-      readEvents().then();
+      readEvents().catch((err) => {
+        console.warn("[useScaffoldEventHistory] Failed to read events:", err);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    provider,
-    contractName,
-    eventName,
-    deployedContractLoading,
     deployedContractData?.address,
     deployedContractData,
+    deployedContractLoading,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(filters, replacer),
     blockData,
@@ -245,17 +252,15 @@ export const useScaffoldEventHistory = <
     }
   }, [wsEvents]);
 
+  // Use devnet.id for polling interval check (devnet uses 4s instead of config interval)
+  const isDevnet = targetNetwork.network === "devnet";
   useInterval(
     async () => {
       if (!deployedContractLoading && (!!wsError || !watch || !wsConnected)) {
         readEvents();
       }
     },
-    watch
-      ? targetNetwork.id !== devnet.id
-        ? scaffoldConfig.pollingInterval
-        : 4_000
-      : null,
+    watch ? (isDevnet ? 4_000 : scaffoldConfig.pollingInterval) : null,
   );
 
   const eventHistoryData = useMemo(() => {

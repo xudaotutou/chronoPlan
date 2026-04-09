@@ -1,4 +1,3 @@
-import { Address } from "@starknet-start/chains";
 import { getRpcUrl } from "./provider";
 
 /**
@@ -7,7 +6,7 @@ import { getRpcUrl } from "./provider";
  * @param strk - The amount of STRK to mint (in STRK units)
  * @returns Promise with the mint result or error
  */
-export async function mintStrk(inputAddress: Address, strk: string) {
+export async function mintStrk(inputAddress: string, strk: string) {
   try {
     const rpcUrl = getRpcUrl("devnet");
 

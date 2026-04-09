@@ -1,9 +1,9 @@
 import { useTheme } from "next-themes";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
-import { getNetworkColor, useSwitchNetwork } from "~~/hooks/scaffold-stark";
+import { getNetworkColor } from "~~/hooks/scaffold-stark";
 import { getTargetNetworks } from "~~/utils/scaffold-stark";
-import { useAccount, useSwitchChain } from "@starknet-start/react";
-import { useEffect, useMemo } from "react";
+import { useStarkZap } from "~~/hooks/useStarkZap";
+import { useMemo } from "react";
 import { constants } from "starknet";
 
 type NetworkOptionsProps = {
@@ -11,16 +11,13 @@ type NetworkOptionsProps = {
 };
 
 export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
-  const { switchChain, error: switchChainError } = useSwitchChain({});
-  const { chainId } = useAccount();
+  const { chainId } = useStarkZap();
+  const switchChain = (_params: { chainId: string }) => {
+    throw new Error("Network switching not supported with current wallet");
+  };
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const allowedNetworks = getTargetNetworks();
-
-  useEffect(() => {
-    if (switchChainError)
-      console.error(`Error switching chains: ${switchChainError}`);
-  }, [switchChainError]);
 
   // note: might need a cleaner solutiojn
   const allowedNetworksMapping = useMemo(() => {

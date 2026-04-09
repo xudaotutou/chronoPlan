@@ -1,11 +1,17 @@
-import {
-  UseAccountResult,
-  useAccount as useStarknetStartAccount,
-} from "@starknet-start/react";
 import { useMemo } from "react";
+import { useStarkZap } from "~~/hooks/useStarkZap";
+
+// Re-export UseAccountResult type for backward compatibility
+export type UseAccountResult = {
+  address: `0x${string}` | undefined;
+  status: "disconnected" | "connecting" | "connected" | "reconnecting";
+  chainId: bigint | undefined;
+  isConnected: boolean | undefined;
+  connector: unknown;
+};
 
 /**
- * Wrapper around starknet-start's useAccount hook.
+ * Wrapper around starkzap's useStarkZap hook.
  * Provides connection status with corrected state handling.
  *
  * @returns {UseAccountResult} An object containing:
@@ -13,21 +19,27 @@ import { useMemo } from "react";
  *   - status: "disconnected" | "connecting" | "connected" | "reconnecting" - Connection status
  *   - chainId: bigint | undefined - The chain ID of the connected network
  *   - isConnected: boolean | undefined - Boolean indicating if the user is connected
- *   - connector: WalletWithStarknetFeatures | undefined - The connected wallet
+ *   - connector: WalletWithStarknetFeatures | undefined - The connected wallet (legacy, always undefined)
  */
 
 export function useAccount(): UseAccountResult {
-  const account = useStarknetStartAccount();
+  const { address, isConnected, isConnecting, chainId } = useStarkZap();
 
   const correctedStatus = useMemo(() => {
-    if (account.status === "connected" && !account.address) {
+    if (isConnecting) {
       return "connecting" as const;
     }
-    return account.status;
-  }, [account.status, account.address]);
+    if (isConnected) {
+      return "connected" as const;
+    }
+    return "disconnected" as const;
+  }, [isConnected, isConnecting]);
 
   return {
-    ...account,
+    address: address as `0x${string}` | undefined,
     status: correctedStatus,
+    chainId,
+    isConnected,
+    connector: undefined, // Legacy - starkzap doesn't expose connector
   };
 }

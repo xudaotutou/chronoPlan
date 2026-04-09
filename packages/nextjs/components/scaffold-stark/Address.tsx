@@ -3,9 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 // CopyToClipboard moved to lazy loading for better performance
-import { Address as AddressType } from "@starknet-start/chains";
 import { getChecksumAddress, StarkProfile } from "starknet";
-import { devnet } from "@starknet-start/chains";
+const CHAIN_ID_DEVNET = BigInt("0x534e5f6465766e6574");
+
+// Address type for use elsewhere
+export type Address = `0x${string}`;
+
 import {
   CheckCircleIcon,
   DocumentDuplicateIcon,
@@ -16,7 +19,7 @@ import { Avatar } from "~~/components/scaffold-stark/Avatar";
 import CopyToClipboard from "react-copy-to-clipboard";
 
 type AddressProps = {
-  address?: AddressType;
+  address?: `0x${string}`;
   disableAddressLink?: boolean;
   format?: "short" | "long";
   profile?: StarkProfile;
@@ -131,7 +134,7 @@ export const Address = ({
         <span className={`ml-1.5 text-${size} font-normal`}>
           {profile?.name || displayAddress}
         </span>
-      ) : targetNetwork.network === devnet.network ? (
+      ) : targetNetwork.id === CHAIN_ID_DEVNET ? (
         <span className={`ml-1.5 text-${size} font-normal`}>
           <Link href={blockExplorerAddressLink}>
             {profile?.name || displayAddress}

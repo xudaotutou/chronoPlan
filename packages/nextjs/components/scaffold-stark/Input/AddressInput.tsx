@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { CommonInputProps, InputBase } from "~~/components/scaffold-stark";
-import { Address } from "@starknet-start/chains";
+type Address = `0x${string}`;
 import { isAddress } from "~~/utils/scaffold-stark/common";
 import Image from "next/image";
 import { blo } from "blo";

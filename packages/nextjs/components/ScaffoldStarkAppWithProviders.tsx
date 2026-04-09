@@ -1,78 +1,73 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { useTheme } from "next-themes";
+import React from "react";
 import { Toaster } from "react-hot-toast";
-import { StarknetConfig } from "@starknet-start/react";
-import { voyager } from "@starknet-start/explorers";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "./ThemeProvider";
 import { Header } from "~~/components/Header";
+import { GetStarknetProvider } from "@starknet-io/get-starknet-modal";
+import ClientDynamicFooter from "./scaffold-stark/ClientDynamicFooter";
 
-import { appChains, extraWallets } from "~~/services/web3/connectors";
-import provider from "~~/services/web3/provider";
-import { useNativeCurrencyPrice } from "~~/hooks/scaffold-stark/useNativeCurrencyPrice";
-
-const queryClient = new QueryClient();
-
-const Footer = dynamic(
-  () => import("~~/components/Footer").then((mod) => mod.Footer),
-  {
-    ssr: false,
+// Configure QueryClient with sensible defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Don't retry on 429 rate limit errors
+      retry: (failureCount, error) => {
+        if (error instanceof Error && error.message.includes("429")) {
+          return false;
+        }
+        return failureCount < 2;
+      },
+      // Reduce network traffic
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   },
-);
+});
 
 const ScaffoldStarkApp = ({ children }: { children: React.ReactNode }) => {
-  useNativeCurrencyPrice();
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
   return (
     <>
       <div className="flex relative flex-col min-h-screen bg-main">
-        {isDarkMode ? (
-          <>
-            <div className="circle-gradient-dark w-[330px] h-[330px]"></div>
-            <div className="circle-gradient-blue-dark w-[330px] h-[330px]"></div>
-          </>
-        ) : (
-          <>
-            <div className="circle-gradient w-[330px] h-[330px]"></div>
-            <div className="circle-gradient-blue w-[330px] h-[630px]"></div>
-          </>
-        )}
         <Header />
-        <main className="relative flex flex-col flex-1">{children}</main>
-        <Footer />
+        <main className="flex-grow container mx-auto px-4 pb-12">
+          {children}
+        </main>
+        <ClientDynamicFooter />
       </div>
-      <Toaster />
+      <Toaster position="bottom-right" />
     </>
   );
 };
 
-export const ScaffoldStarkAppWithProviders = ({
+const LoadingPlaceholder = () => (
+  <div className="min-h-screen bg-main flex items-center justify-center">
+    <div className="text-center">
+      <div className="loading loading-spinner loading-lg text-primary"></div>
+      <p className="mt-4">Loading...</p>
+    </div>
+  </div>
+);
+
+export function ScaffoldStarkAppWithProviders({
   children,
 }: {
   children: React.ReactNode;
-}) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
+}) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <StarknetConfig
-        chains={[...appChains]}
-        provider={provider}
-        explorer={voyager}
-        autoConnect={true}
-        extraWallets={extraWallets}
-      >
-        <ScaffoldStarkApp>{children}</ScaffoldStarkApp>
-      </StarknetConfig>
-    </QueryClientProvider>
+    <ThemeProvider
+      themes={["chrono", "chrono-light"]}
+      defaultTheme="chrono"
+      enableSystem={false}
+    >
+      <QueryClientProvider client={queryClient}>
+        <GetStarknetProvider>
+          <ScaffoldStarkApp>{children}</ScaffoldStarkApp>
+        </GetStarknetProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
-};
+}
+
+export default ScaffoldStarkAppWithProviders;

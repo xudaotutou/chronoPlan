@@ -1,10 +1,35 @@
-import * as chains from "@starknet-start/chains";
+// Minimal chain type for starkzap migration
+export type Chain = {
+  id: bigint;
+  network: string;
+  name: string;
+  nativeCurrency?: {
+    name: string;
+    symbol: string;
+    decimals: number;
+    address?: `0x${string}`;
+  };
+  testnet?: boolean;
+  rpcUrls: {
+    default: { http: string[] };
+    public: { http: string[] };
+  };
+  explorers?: { voyager?: string[] };
+  paymasterRpcUrls?: {
+    avnu?: { http: string[] };
+  };
+};
+
+// Chain IDs
+const MAINNET_ID = BigInt("0x534e5f4d41494e"); // "SN_MAIN"
+const SEPOLIA_ID = BigInt("0x534e5f5345504f4c4941"); // "SN_SEPOLIA"
+const DEVNET_ID = BigInt("0x534e5f6465766e6574"); // "SN_devnet"
 
 const rpcUrlDevnet =
   process.env.NEXT_PUBLIC_DEVNET_PROVIDER_URL || "http://127.0.0.1:5050";
 // devnet with mainnet network ID
-const mainnetFork = {
-  id: chains.mainnet.id,
+const mainnetFork: Chain = {
+  id: MAINNET_ID,
   network: "devnet",
   name: "Starknet Mainnet Fork",
   nativeCurrency: {
@@ -28,10 +53,12 @@ const mainnetFork = {
       http: [rpcUrlDevnet],
     },
   },
-} as chains.Chain;
+};
 
-const devnet = {
-  ...chains.devnet,
+const devnet: Chain = {
+  id: DEVNET_ID,
+  network: "devnet",
+  name: "Starknet Devnet",
   rpcUrls: {
     default: {
       http: [],
@@ -40,6 +67,47 @@ const devnet = {
       http: [`${rpcUrlDevnet}/rpc`],
     },
   },
-} as const satisfies chains.Chain;
+};
 
-export const supportedChains = { ...chains, devnet, mainnetFork };
+const rpcUrlSepolia =
+  process.env.NEXT_PUBLIC_SEPOLIA_PROVIDER_URL ||
+  "https://starknet-sepolia.public.blastapi.io/rpc/v0_9";
+
+const sepolia: Chain = {
+  id: SEPOLIA_ID,
+  network: "sepolia",
+  name: "Starknet Sepolia",
+  testnet: true,
+  rpcUrls: {
+    default: {
+      http: [],
+    },
+    public: {
+      http: [rpcUrlSepolia],
+    },
+  },
+};
+
+const mainnet: Chain = {
+  id: MAINNET_ID,
+  network: "mainnet",
+  name: "Starknet Mainnet",
+  rpcUrls: {
+    default: {
+      http: [],
+    },
+    public: {
+      http: ["https://starknet-mainnet.public.blastapi.io/rpc/v0_9"],
+    },
+  },
+};
+
+export const supportedChains: {
+  mainnetFork: Chain;
+  devnet: Chain;
+  sepolia: Chain;
+  mainnet: Chain;
+} = { mainnetFork, devnet, sepolia, mainnet };
+
+// Export chain IDs and types for backward compatibility
+export { MAINNET_ID, SEPOLIA_ID, DEVNET_ID };

@@ -1,52 +1,47 @@
 /** @type {import('next').NextConfig} */
-import webpack from "webpack";
-import nextPWA from "next-pwa";
-
-const withPWA = nextPWA({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
-  skipWaiting: true,
-});
-
 const nextConfig = {
   reactStrictMode: true,
-  logging: {
-    incomingRequests: false,
-  },
-  images: {
-    dangerouslyAllowSVG: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "identicon.starknet.id",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "img.starkurabu.com",
-        pathname: "/**",
-      },
-    ],
-  },
   typescript: {
-    ignoreBuildErrors: process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true",
+    // Only ignore build errors in development (set via env var)
+    ignoreBuildErrors: process.env.NEXT_PUBLIC_IGNORE_TS_ERRORS === "true",
   },
-  eslint: {
-    ignoreDuringBuilds: process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true",
+  turbopack: {
+    resolveAlias: {
+      // starkzap optional peer dependencies - only needed for specific features
+      "@fatsolutions/tongo-sdk": {},
+      "@solana/web3.js": {},
+      "@hyperlane-xyz/sdk": {},
+      "@hyperlane-xyz/registry": {},
+      "@hyperlane-xyz/utils": {},
+    },
   },
-  webpack: (config, { dev, isServer }) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
+  webpack: (config, { isServer }) => {
+    // Only applies to webpack builds (dev mode with --webpack)
+    config.resolve.fallback = {
+      fs: false,
+      net: false,
+      tls: false,
+      path: false,
+      os: false,
+      crypto: false,
+    };
     config.externals.push("pino-pretty", "lokijs", "encoding");
-    config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(/^node:(.*)$/, (resource) => {
-        resource.request = resource.request.replace(/^node:/, "");
-      }),
-    );
 
-    if (dev && !isServer) {
-      config.infrastructureLogging = {
-        level: "error",
+    // starkzap optional peer dependencies
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@fatsolutions/tongo-sdk": false,
+      "@solana/web3.js": false,
+      "@hyperlane-xyz/sdk": false,
+      "@hyperlane-xyz/registry": false,
+      "@hyperlane-xyz/utils": false,
+    };
+
+    // Provide empty module for fs on client side
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        fs: false,
       };
     }
 
@@ -54,4 +49,4 @@ const nextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;

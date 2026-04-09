@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Address as AddressType } from "@starknet-start/chains";
+
+type AddressType = `0x${string}`;
 import { Address } from "~~/components/scaffold-stark";
 import { QRCodeSVG } from "qrcode.react";
 

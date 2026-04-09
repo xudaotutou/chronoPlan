@@ -7,12 +7,26 @@ import type {
   ExtractAbiEventNames,
   ExtractAbiInterfaces,
   ExtractArgs,
-} from "abi-wan-kanabi/dist/kanabi";
-import {
-  UseReadContractProps,
-  UseSendTransactionProps,
-} from "@starknet-start/react";
-import { Address } from "@starknet-start/chains";
+} from "abi-wan-kanabi/kanabi";
+// Local type definitions to replace @starknet-start/react
+export type UseReadContractProps<
+  TAbi extends Abi,
+  TFunctionName extends string,
+> = {
+  address: string;
+  abi: TAbi;
+  functionName: TFunctionName;
+  args?: any[];
+  blockIdentifier?: any;
+  parseArgs?: boolean;
+};
+
+export type UseSendTransactionProps = {
+  calls?: any[];
+};
+
+// Local Address type
+export type Address = `0x${string}`;
 import {
   CairoCustomEnum,
   CairoOption,
@@ -53,7 +67,8 @@ type ConfiguredChainId =
   (typeof scaffoldConfig)["targetNetworks"][0]["network"];
 export type InheritedFunctions = { readonly [key: string]: string };
 
-type Contracts = ContractsDeclaration[ConfiguredChainId];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Contracts = Record<string, GenericContract>;
 export type ContractName = keyof Contracts;
 export type Contract<TContractName extends ContractName> =
   Contracts[TContractName];
@@ -175,11 +190,25 @@ export type AbiEnum = {
   name: string;
   variants: readonly AbiParameter[];
 };
-
 // TODO: resolve type properly
 export const contracts =
   contractsData as unknown as GenericContractsDeclaration | null;
 
+/**
+ * Safely access a contract from the contracts registry.
+ * Workaround for TypeScript readonly index signature compatibility.
+ */
+export function getContractForNetwork<TCName extends ContractName>(
+  networkKey: string,
+  contractName: TCName,
+): Contract<TCName> | undefined {
+  if (!contracts) return undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const network = (contracts as any)[networkKey];
+  if (!network) return undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return network[contractName] as Contract<TCName>;
+}
 export type UseScaffoldWriteConfig<
   TAbi extends Abi,
   TContractName extends ContractName,

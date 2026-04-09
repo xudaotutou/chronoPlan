@@ -3,6 +3,2475 @@
  * You should not edit it manually or your changes might be overwritten.
  */
 
-const deployedContracts = {} as const;
+const deployedContracts = {
+  devnet: {
+    Registry: {
+      address:
+        "0x11a8580a144c0117192438e2b80bf9b844b372f0be8076a99bfdf1e60e22817",
+      abi: [
+        {
+          type: "impl",
+          name: "RegistryImpl",
+          interface_name: "chrono_plan::interfaces::i_registry::IRegistry",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "chrono_plan::interfaces::i_registry::PlanInfo",
+          members: [
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "curve_key",
+              type: "core::felt252",
+            },
+            {
+              name: "created_at",
+              type: "core::integer::u64",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_registry::IRegistry",
+          items: [
+            {
+              type: "function",
+              name: "register_plan",
+              inputs: [
+                {
+                  name: "plan_id",
+                  type: "core::felt252",
+                },
+                {
+                  name: "schedule_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "funder",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "amount",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "token_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "curve_key",
+                  type: "core::felt252",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_plan_info",
+              inputs: [
+                {
+                  name: "plan_id",
+                  type: "core::felt252",
+                },
+              ],
+              outputs: [
+                {
+                  type: "chrono_plan::interfaces::i_registry::PlanInfo",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_total_plans",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plans_by_recipient",
+              inputs: [
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::array::Array::<core::felt252>",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plans_by_funder",
+              inputs: [
+                {
+                  name: "funder",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::array::Array::<core::felt252>",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plan_count_by_recipient",
+              inputs: [
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u32",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plan_count_by_funder",
+              inputs: [
+                {
+                  name: "funder",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u32",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "is_registered",
+              inputs: [
+                {
+                  name: "schedule_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "RegistryAdminImpl",
+          interface_name: "chrono_plan::interfaces::i_registry::IRegistryAdmin",
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_registry::IRegistryAdmin",
+          items: [
+            {
+              type: "function",
+              name: "set_factory",
+              inputs: [
+                {
+                  name: "factory",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_factory",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "admin",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::registry::Registry::PlanRegistered",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "OwnershipTransferred",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+              kind: "nested",
+            },
+            {
+              name: "OwnershipTransferStarted",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::registry::Registry::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "PlanRegistered",
+              type: "chrono_plan::application::registry::Registry::PlanRegistered",
+              kind: "nested",
+            },
+            {
+              name: "OwnableEvent",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+              kind: "flat",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x559191f612f0e982ba45c65d615548648a2b430ecb3d20ab72a90dca9868282",
+    },
+    ScheduleProxy: {
+      address: null,
+      abi: [
+        {
+          type: "impl",
+          name: "ScheduleImpl",
+          interface_name: "chrono_plan::interfaces::i_schedule::ISchedule",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "chrono_plan::domain::types::schedule::PlanStatus",
+          variants: [
+            {
+              name: "Active",
+              type: "()",
+            },
+            {
+              name: "Completed",
+              type: "()",
+            },
+            {
+              name: "Closed",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_schedule::ISchedule",
+          items: [
+            {
+              type: "function",
+              name: "claim",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_available",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_status",
+              inputs: [],
+              outputs: [
+                {
+                  type: "chrono_plan::domain::types::schedule::PlanStatus",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "close",
+              inputs: [
+                {
+                  name: "refund_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "finalize",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_recipient",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_amount",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_claimed",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plan_id",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::felt252",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_curve_name",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::felt252",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_governance_address",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "UpgradeableImpl",
+          interface_name: "chrono_plan::interfaces::i_schedule::IUpgradeable",
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_schedule::IUpgradeable",
+          items: [
+            {
+              type: "function",
+              name: "upgrade",
+              inputs: [
+                {
+                  name: "new_impl",
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_implementation",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "chrono_plan::domain::types::schedule::DeploymentSpec",
+          members: [
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+            },
+            {
+              name: "start_time",
+              type: "core::integer::u64",
+            },
+            {
+              name: "duration",
+              type: "core::integer::u64",
+            },
+            {
+              name: "curve_key",
+              type: "core::felt252",
+            },
+            {
+              name: "curve_params",
+              type: "core::felt252",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "governance_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+            },
+            {
+              name: "spec",
+              type: "chrono_plan::domain::types::schedule::DeploymentSpec",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCreated",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "governance_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "start_time",
+              type: "core::integer::u64",
+              kind: "data",
+            },
+            {
+              name: "duration",
+              type: "core::integer::u64",
+              kind: "data",
+            },
+            {
+              name: "curve_key",
+              type: "core::felt252",
+              kind: "data",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::Claimed",
+          kind: "struct",
+          members: [
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "total_claimed",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleClosed",
+          kind: "struct",
+          members: [
+            {
+              name: "refunded_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "refunded_amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCompleted",
+          kind: "struct",
+          members: [
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "total_claimed",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+          kind: "enum",
+          variants: [],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+          kind: "struct",
+          members: [
+            {
+              name: "class_hash",
+              type: "core::starknet::class_hash::ClassHash",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "Upgraded",
+              type: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "ScheduleCreated",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCreated",
+              kind: "nested",
+            },
+            {
+              name: "Claimed",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::Claimed",
+              kind: "nested",
+            },
+            {
+              name: "ScheduleClosed",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleClosed",
+              kind: "nested",
+            },
+            {
+              name: "ScheduleCompleted",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCompleted",
+              kind: "nested",
+            },
+            {
+              name: "ReentrancyGuardEvent",
+              type: "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+              kind: "flat",
+            },
+            {
+              name: "UpgradeableEvent",
+              type: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+              kind: "flat",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x1e3ea0f7aa04a15cae9506aaf7871cf1fd3519149479e28dad6d9a69e458a90",
+    },
+    Factory: {
+      address:
+        "0x66945f9105cab1a4072c1daf3dd83fb9764360cd81fbaef3ca6852317aee314",
+      abi: [
+        {
+          type: "impl",
+          name: "FactoryImpl",
+          interface_name: "chrono_plan::interfaces::i_factory::IFactory",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_factory::IFactory",
+          items: [
+            {
+              type: "function",
+              name: "deploy_schedule",
+              inputs: [
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "amount",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "start_time",
+                  type: "core::integer::u64",
+                },
+                {
+                  name: "duration",
+                  type: "core::integer::u64",
+                },
+                {
+                  name: "curve_key",
+                  type: "core::felt252",
+                },
+                {
+                  name: "curve_params",
+                  type: "core::felt252",
+                },
+                {
+                  name: "token_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "governance_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_plan_counter",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "version",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::felt252",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_admin",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_schedule_class_hash",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "is_paused",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "AdminFunctions",
+          interface_name: "chrono_plan::application::factory::IAdmin",
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::application::factory::IAdmin",
+          items: [
+            {
+              type: "function",
+              name: "set_schedule_class_hash",
+              inputs: [
+                {
+                  name: "class_hash",
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "set_registry",
+              inputs: [
+                {
+                  name: "registry",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "recover_erc20",
+              inputs: [
+                {
+                  name: "token_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "amount",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "admin",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::ScheduleDeployed",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "governance_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::DeploymentFailed",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "reason",
+              type: "core::felt252",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::ClassHashSet",
+          kind: "struct",
+          members: [
+            {
+              name: "class_hash",
+              type: "core::starknet::class_hash::ClassHash",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::EmergencyRecovery",
+          kind: "struct",
+          members: [
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "OwnershipTransferred",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+              kind: "nested",
+            },
+            {
+              name: "OwnershipTransferStarted",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::pausable::PausableComponent::Paused",
+          kind: "struct",
+          members: [
+            {
+              name: "account",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::pausable::PausableComponent::Unpaused",
+          kind: "struct",
+          members: [
+            {
+              name: "account",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::pausable::PausableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "Paused",
+              type: "openzeppelin_security::pausable::PausableComponent::Paused",
+              kind: "nested",
+            },
+            {
+              name: "Unpaused",
+              type: "openzeppelin_security::pausable::PausableComponent::Unpaused",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "ScheduleDeployed",
+              type: "chrono_plan::application::factory::Factory::ScheduleDeployed",
+              kind: "nested",
+            },
+            {
+              name: "DeploymentFailed",
+              type: "chrono_plan::application::factory::Factory::DeploymentFailed",
+              kind: "nested",
+            },
+            {
+              name: "ClassHashSet",
+              type: "chrono_plan::application::factory::Factory::ClassHashSet",
+              kind: "nested",
+            },
+            {
+              name: "EmergencyRecovery",
+              type: "chrono_plan::application::factory::Factory::EmergencyRecovery",
+              kind: "nested",
+            },
+            {
+              name: "OwnableEvent",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+              kind: "flat",
+            },
+            {
+              name: "PausableEvent",
+              type: "openzeppelin_security::pausable::PausableComponent::Event",
+              kind: "flat",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x669dbb4b8825e3d33d2703a6db162f200e012ef5d2990e86caf8c84aeee30e6",
+    },
+  },
+  sepolia: {
+    Registry: {
+      address:
+        "0x3186bb75535a692ead024c2e1e6175d9d83fe4f386104374960d8cc144ea4aa",
+      abi: [
+        {
+          type: "impl",
+          name: "RegistryImpl",
+          interface_name: "chrono_plan::interfaces::i_registry::IRegistry",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "chrono_plan::interfaces::i_registry::PlanInfo",
+          members: [
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "curve_key",
+              type: "core::felt252",
+            },
+            {
+              name: "created_at",
+              type: "core::integer::u64",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_registry::IRegistry",
+          items: [
+            {
+              type: "function",
+              name: "register_plan",
+              inputs: [
+                {
+                  name: "plan_id",
+                  type: "core::felt252",
+                },
+                {
+                  name: "schedule_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "funder",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "amount",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "token_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "curve_key",
+                  type: "core::felt252",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_plan_info",
+              inputs: [
+                {
+                  name: "plan_id",
+                  type: "core::felt252",
+                },
+              ],
+              outputs: [
+                {
+                  type: "chrono_plan::interfaces::i_registry::PlanInfo",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_total_plans",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plans_by_recipient",
+              inputs: [
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::array::Array::<core::felt252>",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plans_by_funder",
+              inputs: [
+                {
+                  name: "funder",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::array::Array::<core::felt252>",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plan_count_by_recipient",
+              inputs: [
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u32",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plan_count_by_funder",
+              inputs: [
+                {
+                  name: "funder",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u32",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "is_registered",
+              inputs: [
+                {
+                  name: "schedule_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "RegistryAdminImpl",
+          interface_name: "chrono_plan::interfaces::i_registry::IRegistryAdmin",
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_registry::IRegistryAdmin",
+          items: [
+            {
+              type: "function",
+              name: "set_factory",
+              inputs: [
+                {
+                  name: "factory",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_factory",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "admin",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::registry::Registry::PlanRegistered",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "OwnershipTransferred",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+              kind: "nested",
+            },
+            {
+              name: "OwnershipTransferStarted",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::registry::Registry::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "PlanRegistered",
+              type: "chrono_plan::application::registry::Registry::PlanRegistered",
+              kind: "nested",
+            },
+            {
+              name: "OwnableEvent",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+              kind: "flat",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x559191f612f0e982ba45c65d615548648a2b430ecb3d20ab72a90dca9868282",
+    },
+    ScheduleProxy: {
+      address: null,
+      abi: [
+        {
+          type: "impl",
+          name: "ScheduleImpl",
+          interface_name: "chrono_plan::interfaces::i_schedule::ISchedule",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "chrono_plan::domain::types::schedule::PlanStatus",
+          variants: [
+            {
+              name: "Active",
+              type: "()",
+            },
+            {
+              name: "Completed",
+              type: "()",
+            },
+            {
+              name: "Closed",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_schedule::ISchedule",
+          items: [
+            {
+              type: "function",
+              name: "claim",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_available",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_status",
+              inputs: [],
+              outputs: [
+                {
+                  type: "chrono_plan::domain::types::schedule::PlanStatus",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "close",
+              inputs: [
+                {
+                  name: "refund_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "finalize",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_recipient",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_amount",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_claimed",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_plan_id",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::felt252",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_curve_name",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::felt252",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_governance_address",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "UpgradeableImpl",
+          interface_name: "chrono_plan::interfaces::i_schedule::IUpgradeable",
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_schedule::IUpgradeable",
+          items: [
+            {
+              type: "function",
+              name: "upgrade",
+              inputs: [
+                {
+                  name: "new_impl",
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_implementation",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "chrono_plan::domain::types::schedule::DeploymentSpec",
+          members: [
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+            },
+            {
+              name: "start_time",
+              type: "core::integer::u64",
+            },
+            {
+              name: "duration",
+              type: "core::integer::u64",
+            },
+            {
+              name: "curve_key",
+              type: "core::felt252",
+            },
+            {
+              name: "curve_params",
+              type: "core::felt252",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "governance_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+            },
+            {
+              name: "spec",
+              type: "chrono_plan::domain::types::schedule::DeploymentSpec",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCreated",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "governance_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "start_time",
+              type: "core::integer::u64",
+              kind: "data",
+            },
+            {
+              name: "duration",
+              type: "core::integer::u64",
+              kind: "data",
+            },
+            {
+              name: "curve_key",
+              type: "core::felt252",
+              kind: "data",
+            },
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::Claimed",
+          kind: "struct",
+          members: [
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "total_claimed",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleClosed",
+          kind: "struct",
+          members: [
+            {
+              name: "refunded_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "refunded_amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCompleted",
+          kind: "struct",
+          members: [
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "total_claimed",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+          kind: "enum",
+          variants: [],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+          kind: "struct",
+          members: [
+            {
+              name: "class_hash",
+              type: "core::starknet::class_hash::ClassHash",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "Upgraded",
+              type: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::schedule_proxy::ScheduleProxy::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "ScheduleCreated",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCreated",
+              kind: "nested",
+            },
+            {
+              name: "Claimed",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::Claimed",
+              kind: "nested",
+            },
+            {
+              name: "ScheduleClosed",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleClosed",
+              kind: "nested",
+            },
+            {
+              name: "ScheduleCompleted",
+              type: "chrono_plan::application::schedule_proxy::ScheduleProxy::ScheduleCompleted",
+              kind: "nested",
+            },
+            {
+              name: "ReentrancyGuardEvent",
+              type: "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+              kind: "flat",
+            },
+            {
+              name: "UpgradeableEvent",
+              type: "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+              kind: "flat",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x42a9c5837b6aff71cfa24fc93eb3a667a9ed6c96ee48650ea0b5fb475af797",
+    },
+    Factory: {
+      address:
+        "0x5f427b50b1bf67f261ca274c6f6679911e0b4bf914e32358e2d0590154599e2",
+      abi: [
+        {
+          type: "impl",
+          name: "FactoryImpl",
+          interface_name: "chrono_plan::interfaces::i_factory::IFactory",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::interfaces::i_factory::IFactory",
+          items: [
+            {
+              type: "function",
+              name: "deploy_schedule",
+              inputs: [
+                {
+                  name: "recipient",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "amount",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "start_time",
+                  type: "core::integer::u64",
+                },
+                {
+                  name: "duration",
+                  type: "core::integer::u64",
+                },
+                {
+                  name: "curve_key",
+                  type: "core::felt252",
+                },
+                {
+                  name: "curve_params",
+                  type: "core::felt252",
+                },
+                {
+                  name: "token_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "governance_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_plan_counter",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "version",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::felt252",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_admin",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "get_schedule_class_hash",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "is_paused",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "AdminFunctions",
+          interface_name: "chrono_plan::application::factory::IAdmin",
+        },
+        {
+          type: "interface",
+          name: "chrono_plan::application::factory::IAdmin",
+          items: [
+            {
+              type: "function",
+              name: "set_schedule_class_hash",
+              inputs: [
+                {
+                  name: "class_hash",
+                  type: "core::starknet::class_hash::ClassHash",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "set_registry",
+              inputs: [
+                {
+                  name: "registry",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "recover_erc20",
+              inputs: [
+                {
+                  name: "token_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "amount",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "admin",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::ScheduleDeployed",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "schedule_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "governance_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::DeploymentFailed",
+          kind: "struct",
+          members: [
+            {
+              name: "plan_id",
+              type: "core::felt252",
+              kind: "key",
+            },
+            {
+              name: "funder",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+            {
+              name: "reason",
+              type: "core::felt252",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::ClassHashSet",
+          kind: "struct",
+          members: [
+            {
+              name: "class_hash",
+              type: "core::starknet::class_hash::ClassHash",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::EmergencyRecovery",
+          kind: "struct",
+          members: [
+            {
+              name: "token_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "recipient",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            {
+              name: "amount",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+          kind: "struct",
+          members: [
+            {
+              name: "previous_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "new_owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "OwnershipTransferred",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+              kind: "nested",
+            },
+            {
+              name: "OwnershipTransferStarted",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::pausable::PausableComponent::Paused",
+          kind: "struct",
+          members: [
+            {
+              name: "account",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::pausable::PausableComponent::Unpaused",
+          kind: "struct",
+          members: [
+            {
+              name: "account",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::pausable::PausableComponent::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "Paused",
+              type: "openzeppelin_security::pausable::PausableComponent::Paused",
+              kind: "nested",
+            },
+            {
+              name: "Unpaused",
+              type: "openzeppelin_security::pausable::PausableComponent::Unpaused",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "chrono_plan::application::factory::Factory::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "ScheduleDeployed",
+              type: "chrono_plan::application::factory::Factory::ScheduleDeployed",
+              kind: "nested",
+            },
+            {
+              name: "DeploymentFailed",
+              type: "chrono_plan::application::factory::Factory::DeploymentFailed",
+              kind: "nested",
+            },
+            {
+              name: "ClassHashSet",
+              type: "chrono_plan::application::factory::Factory::ClassHashSet",
+              kind: "nested",
+            },
+            {
+              name: "EmergencyRecovery",
+              type: "chrono_plan::application::factory::Factory::EmergencyRecovery",
+              kind: "nested",
+            },
+            {
+              name: "OwnableEvent",
+              type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+              kind: "flat",
+            },
+            {
+              name: "PausableEvent",
+              type: "openzeppelin_security::pausable::PausableComponent::Event",
+              kind: "flat",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x669dbb4b8825e3d33d2703a6db162f200e012ef5d2990e86caf8c84aeee30e6",
+    },
+  },
+} as const;
 
 export default deployedContracts;

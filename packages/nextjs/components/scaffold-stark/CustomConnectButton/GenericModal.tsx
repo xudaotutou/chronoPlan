@@ -9,8 +9,7 @@ const GenericModal = ({
   className?: string;
   modalId: string;
 }) => {
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
+  useTheme(); // keep for theme context
   return (
     <label htmlFor={modalId} className="modal backdrop-blur-sm cursor-pointer">
       <label className={className} style={{ minHeight: "auto" }}>

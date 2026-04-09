@@ -1,21 +1,29 @@
-import { useAccount } from "~~/hooks/useAccount";
-import { Call } from "starknet";
+import type { Call } from "starknet";
 import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-stark";
 import { useTargetNetwork } from "./useTargetNetwork";
-import { useState, useEffect } from "react";
-import {
-  useSendTransaction,
-  UseSendTransactionResult,
-  useTransactionReceipt,
-  UseTransactionReceiptResult,
-} from "@starknet-start/react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useStarkZap } from "~~/hooks/useStarkZap";
 
 type TransactionFunc = (tx: Call[]) => Promise<string | undefined>;
 
 interface UseTransactorReturn {
   writeTransaction: TransactionFunc;
-  transactionReceiptInstance: UseTransactionReceiptResult;
-  sendTransactionInstance: UseSendTransactionResult;
+  // These are kept for backward compatibility but are now simplified
+  transactionReceiptInstance: {
+    data: unknown;
+    status: "idle" | "pending" | "success" | "error";
+    error?: Error;
+  };
+  sendTransactionInstance: {
+    sendAsync: (calls: Call[]) => Promise<string>;
+    isLoading: boolean;
+    isPending: boolean;
+    isSuccess: boolean;
+    isError: boolean;
+    data?: { txHash: string };
+    error?: Error;
+    reset: () => void;
+  };
 }
 
 const TxnNotification = ({
@@ -44,18 +52,17 @@ const TxnNotification = ({
 
 /**
  * Handles sending transactions to Starknet contracts with comprehensive UI feedback and state management.
- * Uses useSendTransaction from starknet-start to submit transactions through the connected wallet.
+ * Uses starkzap service layer to submit transactions through the connected wallet.
  *
  * @returns {UseTransactorReturn} An object containing:
  *   - writeTransaction: (tx: Call[]) => Promise<string | undefined> - Async function that sends transactions with notifications and state management
- *   - transactionReceiptInstance: UseTransactionReceiptResult - Transaction receipt data and status
- *   - sendTransactionInstance: UseSendTransactionResult - Send transaction state and methods
+ *   - transactionReceiptInstance: Simplified transaction receipt state
+ *   - sendTransactionInstance: Simplified send transaction state and methods
  * @see {@link https://scaffoldstark.com/docs/hooks/useTransactor}
  */
 export const useTransactor = (): UseTransactorReturn => {
-  const { address, status } = useAccount();
+  const { address, isConnected, execute, getWallet } = useStarkZap();
   const { targetNetwork } = useTargetNetwork();
-  const sendTransactionInstance = useSendTransaction({});
 
   const [notificationId, setNotificationId] = useState<string | null>(null);
   const [blockExplorerTxURL, setBlockExplorerTxURL] = useState<
@@ -64,17 +71,55 @@ export const useTransactor = (): UseTransactorReturn => {
   const [transactionHash, setTransactionHash] = useState<string | undefined>(
     undefined,
   );
-  const transactionReceiptInstance = useTransactionReceipt({
-    hash: transactionHash,
-    enabled: !!transactionHash,
-    watch: true,
-  });
-  const { data: txResult, status: txStatus } = transactionReceiptInstance;
+  const [txResult, setTxResult] = useState<unknown>(null);
+  const [txStatus, setTxStatus] = useState<
+    "idle" | "pending" | "success" | "error"
+  >("idle");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
+
+  // Ref to track pending transaction
+  const pendingTxRef = useRef<{
+    txHash: string;
+    wait: () => Promise<void>;
+  } | null>(null);
 
   const resetStates = () => {
     setTransactionHash(undefined);
     setBlockExplorerTxURL(undefined);
+    setTxStatus("idle");
+    setTxResult(null);
+    setError(undefined);
+    pendingTxRef.current = null;
   };
+
+  // Poll for transaction receipt
+  const pollReceipt = useCallback(
+    async (txHash: string, maxWait = 120000): Promise<unknown> => {
+      const wallet = getWallet?.();
+      if (!wallet) {
+        throw new Error("Wallet not available");
+      }
+
+      const provider = wallet.getProvider();
+      const start = Date.now();
+      const interval = 2000;
+
+      while (Date.now() - start < maxWait) {
+        try {
+          const receipt = await provider.getTransactionReceipt(txHash);
+          if (receipt) {
+            return receipt;
+          }
+        } catch {
+          // Transaction not yet confirmed, continue polling
+        }
+        await new Promise((r) => setTimeout(r, interval));
+      }
+      throw new Error("Transaction timeout");
+    },
+    [],
+  );
 
   useEffect(() => {
     if (notificationId && txStatus && txStatus !== "pending") {
@@ -91,47 +136,60 @@ export const useTransactor = (): UseTransactorReturn => {
         },
       );
     }
-  }, [txResult]);
+  }, [txResult, txStatus]);
 
   const writeTransaction = async (tx: Call[]): Promise<string | undefined> => {
     resetStates();
-    if (!address || status !== "connected") {
+    if (!address || !isConnected) {
       notification.error("Cannot access account");
       console.error("⚡️ ~ file: useTransactor.tsx ~ error");
       return;
     }
 
-    let notificationId = null;
-    let transactionHash: string | undefined = undefined;
+    let notificationIdValue: string | number | null = null;
+    let txHashResult: string | undefined = undefined;
     try {
-      notificationId = notification.loading(
+      notificationIdValue = notification.loading(
         <TxnNotification message="Awaiting for user confirmation" />,
       );
 
-      const result = await sendTransactionInstance.sendAsync(tx);
-      transactionHash =
-        typeof result === "string" ? result : result.transaction_hash;
+      const result = await execute(tx);
+      txHashResult = result.txHash;
+      pendingTxRef.current = { txHash: result.txHash, wait: result.wait };
 
-      setTransactionHash(transactionHash);
+      setTransactionHash(txHashResult);
+      setTxStatus("pending");
+      setIsLoading(true);
 
-      notification.remove(notificationId);
+      notification.remove(notificationIdValue);
 
-      const blockExplorerTxURL = getBlockExplorerTxLink(
+      const blockExplorerTxURLValue = getBlockExplorerTxLink(
         targetNetwork.network,
-        transactionHash,
+        txHashResult,
       );
-      setBlockExplorerTxURL(blockExplorerTxURL);
+      setBlockExplorerTxURL(blockExplorerTxURLValue);
 
-      notificationId = notification.loading(
+      notificationIdValue = notification.loading(
         <TxnNotification
           message="Waiting for transaction to complete."
-          blockExplorerLink={blockExplorerTxURL}
+          blockExplorerLink={blockExplorerTxURLValue}
         />,
       );
-      setNotificationId(notificationId);
+      setNotificationId(notificationIdValue);
+
+      // Wait for transaction to complete
+      try {
+        const receipt = await pollReceipt(txHashResult);
+        setTxResult(receipt);
+        setTxStatus("success");
+      } catch (pollError) {
+        // Transaction was sent but waiting failed - still consider it pending
+        console.warn("Transaction polling failed:", pollError);
+        setTxStatus("idle"); // Keep as idle since we don't know final state
+      }
     } catch (error: any) {
-      if (notificationId) {
-        notification.remove(notificationId);
+      if (notificationIdValue) {
+        notification.remove(notificationIdValue);
       }
 
       const errorPattern = /Contract (.*?)"}/;
@@ -141,15 +199,41 @@ export const useTransactor = (): UseTransactorReturn => {
       console.error("⚡️ ~ file: useTransactor.tsx ~ error", message);
 
       notification.error(message);
+      setError(error);
+      setTxStatus("error");
       throw error;
+    } finally {
+      setIsLoading(false);
     }
 
-    return transactionHash;
+    return txHashResult;
+  };
+
+  // sendAsync wrapper for backward compatibility
+  const sendAsync = async (calls: Call[]): Promise<string> => {
+    const result = await writeTransaction(calls);
+    if (!result) {
+      throw new Error("Transaction failed");
+    }
+    return result;
   };
 
   return {
     writeTransaction,
-    transactionReceiptInstance,
-    sendTransactionInstance,
+    transactionReceiptInstance: {
+      data: txResult,
+      status: txStatus,
+      error,
+    },
+    sendTransactionInstance: {
+      sendAsync,
+      isLoading,
+      isPending: isLoading,
+      isSuccess: txStatus === "success",
+      isError: txStatus === "error",
+      data: transactionHash ? { txHash: transactionHash } : undefined,
+      error,
+      reset: resetStates,
+    },
   };
 };

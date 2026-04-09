@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-// CopyToClipboard moved to lazy loading for better performance
-import { Address as AddressType } from "@starknet-start/chains";
-import { devnet } from "@starknet-start/chains";
+
+type Address = `0x${string}`;
+
 import {
   CheckCircleIcon,
   DocumentDuplicateIcon,
@@ -13,8 +13,10 @@ import { useTargetNetwork } from "~~/hooks/scaffold-stark/useTargetNetwork";
 import { getBlockExplorerClasshashLink } from "~~/utils/scaffold-stark";
 import CopyToClipboard from "react-copy-to-clipboard";
 
+const CHAIN_ID_DEVNET = BigInt("0x534e5f6465766e6574");
+
 type ClasshashProps = {
-  classHash: AddressType;
+  classHash: Address;
   format?: "short" | "long";
   size?: "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
 };
@@ -46,7 +48,7 @@ export const ClassHash = ({
       <div className="shrink-0">
         <span className={`text-${size} font-normal`}>class hash: </span>
       </div>
-      {targetNetwork.network === devnet.network ? (
+      {targetNetwork.id === CHAIN_ID_DEVNET ? (
         <span className={`ml-1.5 text-${size} font-normal`}>
           <Link href={blockExplorerAddressLink}>{displayClasshash}</Link>
         </span>

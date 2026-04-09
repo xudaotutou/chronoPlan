@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTargetNetwork } from "./useTargetNetwork";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
-import { Abi, ExtractAbiEventNames } from "abi-wan-kanabi/dist/kanabi";
-import { RpcProvider, WebSocketChannel } from "starknet";
+import { Abi, ExtractAbiEventNames } from "abi-wan-kanabi/kanabi";
+import { WebSocketChannel } from "starknet";
 import type { SubscribeEventsParams } from "starknet";
 import { buildEventKeys } from "~~/utils/scaffold-stark/eventKeyFilter";
 import { parseEventData } from "~~/utils/scaffold-stark/eventsData";
@@ -12,6 +12,8 @@ import {
   UseScaffoldWebSocketEventsConfig,
 } from "~~/utils/scaffold-stark/contract";
 import { getSharedWebSocketChannel } from "~~/services/web3/websocket";
+import { useSDKStore } from "~~/services/store/sdk";
+
 import {
   enrichLog,
   resolveEventAbi,
@@ -38,10 +40,6 @@ export const useScaffoldWebSocketEvents = <
   const { targetNetwork } = useTargetNetwork();
   const { data: deployedContractData, isLoading: deployedContractLoading } =
     useDeployedContractInfo(contractName);
-
-  const httpClient = useMemo(() => {
-    return new RpcProvider({ nodeUrl: targetNetwork.rpcUrls.public.http[0] });
-  }, [targetNetwork.rpcUrls.public.http]);
 
   const eventAbi = useMemo(() => {
     return resolveEventAbi<TContractName, TEventName>(
@@ -79,7 +77,7 @@ export const useScaffoldWebSocketEvents = <
       );
 
       const params: SubscribeEventsParams = {
-        fromAddress: deployedContractData.address,
+        fromAddress: deployedContractData.address as `0x${string}`,
         keys,
         blockIdentifier:
           typeof fromBlock !== "undefined" ? Number(fromBlock) : undefined,
@@ -100,8 +98,9 @@ export const useScaffoldWebSocketEvents = <
           return;
         }
         // Optionally enrich via HTTP for details
+        const sdk = useSDKStore.getState().getSDK();
         const { block, transaction, receipt } = await enrichLog(
-          httpClient,
+          sdk.getProvider(),
           evt,
           {
             block: true,

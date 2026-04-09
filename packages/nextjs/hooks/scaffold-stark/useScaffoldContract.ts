@@ -1,9 +1,10 @@
 "use client";
+import { useEffect, useMemo, useState } from "react";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
 import { ContractName } from "~~/utils/scaffold-stark/contract";
-import { Contract, Abi } from "starknet";
-import { useProvider } from "@starknet-start/react";
-import { useMemo } from "react";
+import { Contract, StarkZap } from "starkzap";
+import { useSDKStore } from "~~/services/store/sdk";
+import { getCurrentWallet } from "~~/services/web3/starkzap";
 
 /**
  * Provides a contract instance for interacting with deployed contracts.
@@ -26,15 +27,31 @@ export const useScaffoldContract = <TContractName extends ContractName>({
   const { data: deployedContractData, isLoading: deployedContractLoading } =
     useDeployedContractInfo(contractName);
 
-  const { provider: publicClient } = useProvider();
+  const [provider, setProvider] = useState<ReturnType<
+    StarkZap["getProvider"]
+  > | null>(null);
+
+  useEffect(() => {
+    const initProvider = async () => {
+      const wallet = getCurrentWallet();
+      if (wallet) {
+        setProvider(wallet.getProvider());
+      } else {
+        // Fallback to provider from starkzap SDK
+        const sdk = useSDKStore.getState().getSDK();
+        setProvider(sdk.getProvider());
+      }
+    };
+    initProvider();
+  }, []);
 
   const contract = useMemo(() => {
-    if (!deployedContractData) return undefined;
+    if (!deployedContractData || !provider) return undefined;
 
     const contractInstance = new Contract({
-      abi: deployedContractData.abi as Abi,
-      address: deployedContractData.address,
-      providerOrAccount: publicClient,
+      abi: deployedContractData.abi,
+      address: deployedContractData?.address as `0x${string}`,
+      providerOrAccount: provider,
     });
 
     const originalCall = contractInstance.call.bind(contractInstance);
@@ -47,7 +64,7 @@ export const useScaffoldContract = <TContractName extends ContractName>({
     };
 
     return contractInstance;
-  }, [deployedContractData, publicClient]);
+  }, [deployedContractData, provider]);
 
   return {
     data: contract,

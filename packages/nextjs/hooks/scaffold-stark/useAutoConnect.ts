@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect, useRef } from "react";
-import { useConnect } from "@starknet-start/react";
-import { useReadLocalStorage } from "usehooks-ts";
-import { burnerWalletId } from "@scaffold-stark/stark-burner";
+import { useStarkZap } from "~~/hooks/useStarkZap";
 import scaffoldConfig from "~~/scaffold.config";
 import { LAST_CONNECTED_TIME_LOCALSTORAGE_KEY } from "~~/utils/Constants";
-import { useAccount } from "~~/hooks/useAccount";
+
+const LAST_CONNECTED_TYPE_KEY = "starkzap_connection_type";
+const WAS_DISCONNECTED_KEY = "was_disconnected_manually";
 
 /**
  * Auto-connects wallet if user has connected before and meets auto-connect criteria.
@@ -12,62 +14,39 @@ import { useAccount } from "~~/hooks/useAccount";
  * - Auto-connect is enabled in scaffold config
  * - User was not manually disconnected
  * - Time since last connection hasn't exceeded TTL
- * - The previously used connector is available
+ *
+ * Only supports Cartridge connection.
  *
  * @returns {void} This hook doesn't return any value but performs auto-connection side effects
  */
 export const useAutoConnect = (): void => {
-  const savedConnector = useReadLocalStorage<{ id: string; ix?: number }>(
-    "lastUsedConnector",
-  );
-  const lastConnectionTime = useReadLocalStorage<number>(
-    LAST_CONNECTED_TIME_LOCALSTORAGE_KEY,
-  );
-  const wasDisconnectedManually = useReadLocalStorage<boolean>(
-    "wasDisconnectedManually",
-  );
-
-  const { connect, connectors } = useConnect();
-  const { status } = useAccount();
-
+  const { connectWithCartridge } = useStarkZap();
+  const { isConnected } = useStarkZap();
   const hasAutoConnected = useRef(false);
 
   useEffect(() => {
     if (hasAutoConnected.current) return;
-    if (!scaffoldConfig.walletAutoConnect || wasDisconnectedManually) return;
+    if (!scaffoldConfig.walletAutoConnect) return;
 
-    const now = Date.now();
-    const ttlExpired =
-      now - (lastConnectionTime || 0) > scaffoldConfig.autoConnectTTL;
+    const wasDisconnected =
+      localStorage.getItem(WAS_DISCONNECTED_KEY) === "true";
+    if (wasDisconnected) return;
 
-    const connector = connectors.find(
-      (c) =>
-        c.name === savedConnector?.id || c.instanceId === savedConnector?.id,
+    const lastConnectionTime = parseInt(
+      localStorage.getItem(LAST_CONNECTED_TIME_LOCALSTORAGE_KEY) || "0",
     );
-    if (!connector) return;
+    const ttlExpired =
+      Date.now() - lastConnectionTime > scaffoldConfig.autoConnectTTL;
+    if (ttlExpired) return;
 
-    const shouldReconnect = status !== "connected" || ttlExpired;
+    const connectionType = localStorage.getItem(LAST_CONNECTED_TYPE_KEY);
+    if (!connectionType) return;
 
-    // Restore burner account selection before connecting
-    if (
-      (connector.name === burnerWalletId ||
-        connector.name === "Burner Wallet") &&
-      savedConnector?.ix !== undefined &&
-      "switchAccount" in connector
-    ) {
-      (connector as any).switchAccount(savedConnector.ix);
+    hasAutoConnected.current = true;
+
+    // Auto-connect with Cartridge
+    if (connectionType === "cartridge") {
+      connectWithCartridge();
     }
-
-    if (shouldReconnect) {
-      hasAutoConnected.current = true;
-      connect({ connector });
-    }
-  }, [
-    connect,
-    connectors,
-    savedConnector,
-    lastConnectionTime,
-    status,
-    wasDisconnectedManually,
-  ]);
+  }, [connectWithCartridge, isConnected]);
 };

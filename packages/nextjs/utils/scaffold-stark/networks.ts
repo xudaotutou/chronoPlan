@@ -1,10 +1,57 @@
 import scaffoldConfig from "~~/scaffold.config";
-import { devnet, sepolia, mainnet, Chain } from "@starknet-start/chains";
-export const chains = {
-  devnet,
-  sepolia,
-  mainnet,
+
+// Chain ID constants
+export const CHAIN_ID_MAINNET = BigInt("0x534e5f4d41494e");
+export const CHAIN_ID_SEPOLIA = BigInt("0x534e5f5345504f4c4941");
+export const CHAIN_ID_DEVNET = BigInt("0x534e5f6465766e6574");
+
+// Network metadata
+export const networks = {
+  mainnet: {
+    id: CHAIN_ID_MAINNET,
+    network: "mainnet" as const,
+    name: "Starknet Mainnet",
+    rpcUrls: {
+      public: {
+        http: ["https://starknet-mainnet.public.blastapi.io/rpc/v0_9"],
+      },
+    },
+    explorers: { voyager: ["https://voyager.online"] },
+  },
+  sepolia: {
+    id: CHAIN_ID_SEPOLIA,
+    network: "sepolia" as const,
+    name: "Starknet Sepolia",
+    rpcUrls: {
+      public: {
+        http: ["https://starknet-sepolia.public.blastapi.io/rpc/v0_9"],
+      },
+    },
+    explorers: { voyager: ["https://sepolia.voyager.online"] },
+  },
+  devnet: {
+    id: CHAIN_ID_DEVNET,
+    network: "devnet" as const,
+    name: "Starknet Devnet",
+    rpcUrls: { public: { http: ["http://127.0.0.1:5050/rpc"] } },
+    explorers: { voyager: ["https://voyager.online"] },
+  },
+} as const;
+
+// Chain type for compatibility - allows any network name
+export type Chain = {
+  id: bigint;
+  network: string;
+  name: string;
+  rpcUrls: { public: { http: readonly string[] } };
+  explorers?: { voyager?: readonly string[] };
 };
+
+// Aliases for backward compatibility
+export const devnet = networks.devnet;
+export const sepolia = networks.sepolia;
+export const mainnet = networks.mainnet;
+export const chains = { devnet, sepolia, mainnet };
 
 type ChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -88,13 +135,15 @@ export function getBlockExplorerClasshashLink(network: Chain, address: string) {
 }
 
 export function getBlockExplorerLink(network: Chain) {
-  switch (network) {
-    case chains.mainnet:
+  switch (network.network) {
+    case "mainnet":
       return "https://voyager.online/";
-    default:
-    case chains.devnet:
-    case chains.sepolia:
+    case "devnet":
+      return "https://127.0.0.1:5050/";
+    case "sepolia":
       return "https://sepolia.voyager.online/";
+    default:
+      return "https://voyager.online/";
   }
 }
 

@@ -1,387 +1,1378 @@
 @import "tailwindcss";
-@config '../tailwind.config.ts';
-
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
 @plugin "daisyui";
 
+/* ═══════════════════════════════════════════════════════════════════════
+   CHRONOPLAN — Chronometric Instrument Design System
+   ═══════════════════════════════════════════════════════════════════════
+   
+   Design Philosophy:
+   - Inspired by precision timekeeping instruments (watches, chronometers)
+   - Warm brass/copper accents against deep slate backgrounds
+   - Circular motifs, tick marks, and instrument-panel aesthetics
+   - Mechanical precision in every element
+   - Motion that evokes timepiece movements
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Theme: Chronometric Dark ──────────────────────────────────────── */
 @plugin "daisyui/theme" {
-  name: "dark";
+  name: "chrono";
+  default: true;
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-content: #fff9fb;
-  --color-base-100: #1c223b;
-  --color-base-200: #2a3655;
-  --color-base-300: #141a30;
-  --color-primary: #212638;
-  --color-primary-content: #dae8ff;
-  --color-secondary: #8b45fd;
-  --color-secondary-content: #0ff;
-  --color-accent: #4969a6;
-  --color-accent-content: #f9fbff;
-  --color-neutral: #f9fbff;
-  --color-neutral-content: #385183;
-  --color-info: #385183;
-  --color-success: #34eeb6;
-  --color-warning: #ffcf72;
-  --color-error: #ff8863;
-  --rounded-btn: 9999rem;
+  /* Deep slate foundation with warm brass undertones */
+  --color-base-100: oklch(0.08 0.015 250);
+  --color-base-200: oklch(0.11 0.018 255);
+  --color-base-300: oklch(0.14 0.02 260);
+  --color-base-content: oklch(0.92 0.008 250);
+
+  /* Brass/Copper primary accent */
+  --color-primary: oklch(0.75 0.15 85);
+  --color-primary-content: oklch(0.12 0.02 85);
+
+  /* Deep teal secondary */
+  --color-secondary: oklch(0.55 0.12 195);
+  --color-secondary-content: oklch(0.95 0.01 195);
+
+  /* Warm amber accent */
+  --color-accent: oklch(0.8 0.16 70);
+  --color-accent-content: oklch(0.15 0.03 70);
+
+  /* Neutral slate */
+  --color-neutral: oklch(0.22 0.02 250);
+  --color-neutral-content: oklch(0.88 0.008 250);
+
+  /* Info - muted blue */
+  --color-info: oklch(0.65 0.12 220);
+  --color-info-content: oklch(0.95 0.01 220);
+
+  /* Success - muted emerald */
+  --color-success: oklch(0.65 0.15 155);
+  --color-success-content: oklch(0.95 0.01 155);
+
+  /* Warning - brass */
+  --color-warning: oklch(0.78 0.16 80);
+  --color-warning-content: oklch(0.15 0.03 80);
+
+  /* Error - muted coral */
+  --color-error: oklch(0.6 0.18 25);
+  --color-error-content: oklch(0.95 0.01 25);
+
+  /* Rounded corners */
+  --radius-selector: 0.125rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.125rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }
 
+/* ── Theme: Chronometric Light ────────────────────────────────────── */
 @plugin "daisyui/theme" {
-  name: "light";
-  default: true;
+  name: "chrono-light";
+  default: false;
+  prefersdark: false;
   color-scheme: light;
 
-  --color-base-content: #212638;
-  --color-base-100: #ffffff;
-  --color-base-200: #f4f8ff;
-  --color-base-300: #ffffff;
-  --color-neutral: #212638;
-  --color-primary: #93bbfb;
-  --color-primary-content: #2a3655;
-  --color-secondary: #8b45fd;
-  --color-secondary-content: #7800ff;
-  --color-accent: #93bbfb;
-  --color-accent-content: #212638;
-  --color-neutral: #212638;
-  --color-neutral-content: #ffffff;
-  --color-info: #93bbfb;
-  --color-success: #34eeb6;
-  --color-warning: #ffcf72;
-  --color-error: #ff8863;
-  --rounded-btn: 9999rem;
+  /* Warm cream foundation */
+  --color-base-100: oklch(0.98 0.005 55);
+  --color-base-200: oklch(0.95 0.008 55);
+  --color-base-300: oklch(0.91 0.012 55);
+  --color-base-content: oklch(0.18 0.02 250);
+
+  /* Brass primary */
+  --color-primary: oklch(0.6 0.16 85);
+  --color-primary-content: oklch(0.98 0.005 85);
+
+  /* Deep teal secondary */
+  --color-secondary: oklch(0.5 0.12 195);
+  --color-secondary-content: oklch(0.98 0.005 195);
+
+  /* Warm amber accent */
+  --color-accent: oklch(0.65 0.14 70);
+  --color-accent-content: oklch(0.98 0.005 70);
+
+  /* Neutral slate */
+  --color-neutral: oklch(0.35 0.02 250);
+  --color-neutral-content: oklch(0.95 0.005 250);
+
+  /* Info */
+  --color-info: oklch(0.6 0.12 220);
+  --color-info-content: oklch(0.98 0.005 220);
+
+  /* Success */
+  --color-success: oklch(0.55 0.14 155);
+  --color-success-content: oklch(0.98 0.005 155);
+
+  /* Warning */
+  --color-warning: oklch(0.65 0.14 80);
+  --color-warning-content: oklch(0.15 0.02 80);
+
+  /* Error */
+  --color-error: oklch(0.55 0.16 25);
+  --color-error-content: oklch(0.98 0.005 25);
+
+  --radius-selector: 0.125rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.125rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }
 
-/* Shared Utilities */
+/* ═══════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════════════ */
 
-[data-theme="light"] {
-  .bg-gradient-modal {
-    background-image: linear-gradient(270deg, #a7ecff -17.42%, #e8b6ff 109.05%);
-  }
-
-  .bg-modal {
-    background: linear-gradient(270deg, #ece9fb -17.42%, #e3f4fd 109.05%);
-  }
-
-  .modal-border {
-    border: 1px solid #5c4fe5;
-  }
-
-  .bg-gradient-nav {
-    background: #000000;
-  }
-
-  .my-btn-z {
-    background-color: #f11eb5;
-    border-color: #f11e80;
-  }
-  .my-btn-z:hover {
-    background-color: #e11c50;
-    border-color: #1c96e1;
-  }
-
-  .bg-main {
-    background: #ffffff;
-  }
-
-  .bg-underline {
-    background: linear-gradient(270deg, #a7ecff -17.42%, #e8b6ff 109.05%);
-  }
-
-  .bg-container {
-    background: transparent;
-  }
-
-  .bg-btn-wallet {
-    background-image: linear-gradient(270deg, #a7ecff -17.42%, #e8b6ff 109.05%);
-  }
-
-  .bg-input {
-    background: rgba(0, 0, 0, 0.07);
-  }
-
-  .bg-component {
-    background: rgba(255, 255, 255, 0.55);
-  }
-
-  .bg-function {
-    background: linear-gradient(270deg, #a7ecff -17.42%, #e8b6ff 109.05%);
-  }
-
-  .text-function {
-    color: #3c1dff;
-  }
-
-  .text-network {
-    color: #7800ff;
-  }
-
-  .tooltip {
-    --tooltip-tail: 6px;
-  }
-
-  .link {
-    text-underline-offset: 2px;
-  }
-
-  .link:hover {
-    opacity: 80%;
-  }
-
-  .contract-content {
-    background: white;
-  }
+body {
+  font-family: "Space Mono", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
 }
 
-/* === DARK-THEME-SPECIFIC CUSTOM UTILITIES === */
-
-[data-theme="dark"] {
-  .bg-gradient-modal {
-    background: #385183;
-  }
-
-  .bg-modal {
-    background: linear-gradient(90deg, #2b2243 0%, #253751 100%);
-  }
-
-  .modal-border {
-    border: 1px solid #4f4ab7;
-  }
-
-  .bg-gradient-nav {
-    background-image: linear-gradient(90deg, #42d2f1 0%, #b248dd 100%);
-  }
-
-  .bg-main {
-    background: #141a31;
-  }
-
-  .bg-underline {
-    background: #5368b4;
-  }
-  .bg-container {
-    background: #141a30;
-  }
-
-  .bg-btn-wallet {
-    background-image: linear-gradient(180deg, #3457d1 0%, #8a45fc 100%);
-  }
-
-  .bg-input {
-    background: rgba(255, 255, 255, 0.07);
-  }
-
-  .bg-component {
-    background: linear-gradient(
-      113deg,
-      rgba(43, 34, 67, 0.6) 20.48%,
-      rgba(37, 55, 81, 0.6) 99.67%
-    );
-  }
-
-  .bg-function {
-    background: rgba(139, 69, 253, 0.37);
-  }
-
-  .text-function {
-    color: #1dd6ff;
-  }
-
-  .text-network {
-    color: #d0a6ff;
-  }
-
-  .contract-content {
-    background: linear-gradient(
-      113.34deg,
-      rgba(43, 34, 67, 0.6) 20.48%,
-      rgba(37, 55, 81, 0.6) 99.67%
-    );
-  }
+/* Display headings — high-contrast optical serif with variable weight */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-optical-sizing: auto;
+  letter-spacing: -0.03em;
 }
 
-@layer utilities {
-  [data-theme="light"] .hover\:bg-gradient-nav:hover {
-    background: #000000;
-  }
-
-  [data-theme="dark"] .hover\:bg-gradient-nav:hover {
-    background-image: linear-gradient(90deg, #42d2f1 0%, #b248dd 100%);
-  }
-
-  .bg-gradient-dark {
-    background-image: linear-gradient(90deg, #42d2f1 0%, #b248dd 100%);
-  }
+/* Display weight variations */
+.font-display-light {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-optical-sizing: auto;
 }
 
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
+.font-display-heavy {
+  font-family: "Fraunces", serif;
+  font-weight: 800;
+  font-optical-sizing: auto;
 }
 
-@utility clip-corner {
-  clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    width: 1rem;
-    height: 1rem;
-    background: inherit;
-    border-top: 1px solid #8a45fc;
-    border-right: 1px solid #8a45fc;
-    clip-path: polygon(100% 0, 0 0, 100% 100%);
-    z-index: 10;
-  }
+/* Accent text — elegant serif for quotes, highlights, emphasis */
+.font-accent {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-style: italic;
 }
 
-@utility trapeze {
-  width: 84px;
-  height: 6px;
-  clip-path: polygon(10% 100%, 90% 100%, 100% 0, 0 0);
+/* Monospace for technical data */
+.font-mono {
+  font-family: "Space Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BACKGROUND SYSTEMS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Dark mode body — deep slate with sophisticated atmosphere */
+[data-theme="dark"] body,
+[data-theme="chrono"] body {
+  background-color: oklch(0.04 0.012 250);
+  background-image:
+    /* Main warm glow from top */
+    radial-gradient(
+      ellipse 100% 60% at 50% -10%,
+      oklch(0.18 0.05 85 / 0.18) 0%,
+      transparent 50%
+    ),
+    /* Secondary glow bottom right - teal undertone */
+      radial-gradient(
+        ellipse 80% 50% at 90% 100%,
+        oklch(0.15 0.06 195 / 0.12) 0%,
+        transparent 45%
+      ),
+    /* Subtle warm accent bottom left */
+      radial-gradient(
+        ellipse 40% 30% at 10% 95%,
+        oklch(0.2 0.04 70 / 0.08) 0%,
+        transparent 40%
+      );
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Animated ambient gradient overlay */
+.ambient-overlay {
   position: relative;
-  background-color: #5c4fe5;
+}
+
+.ambient-overlay::before {
+  content: "";
   position: absolute;
-  top: -1px;
-  &::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    width: 84px;
-    height: 6px;
-    background: inherit;
-    clip-path: polygon(100% 100%, 100% 0, 90% 100%);
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    oklch(0.75 0.15 85 / 0.02) 50%,
+    transparent 100%
+  );
+  animation: ambient-sweep 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes ambient-sweep {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(100%);
   }
 }
 
-@utility btn {
-  @apply rounded-full hover:border-transparent;
+/* Light mode body — warm cream with sophisticated gradients */
+[data-theme="chrono-light"] body,
+[data-theme="chrono-light"] body {
+  background-color: oklch(0.97 0.006 55);
+  background-image:
+    /* Warm brass glow top center */
+    radial-gradient(
+      ellipse 100% 50% at 50% -5%,
+      oklch(0.85 0.05 85 / 0.25) 0%,
+      transparent 45%
+    ),
+    /* Teal accent bottom left */
+      radial-gradient(
+        ellipse 50% 35% at 15% 95%,
+        oklch(0.88 0.04 195 / 0.15) 0%,
+        transparent 40%
+      ),
+    /* Soft brass accent bottom right */
+      radial-gradient(
+        ellipse 40% 30% at 85% 90%,
+        oklch(0.92 0.03 70 / 0.12) 0%,
+        transparent 35%
+      );
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-@utility btn-sm {
-  @apply text-sm;
+/* ── Tick Mark Grid ───────────────────────────────────────────────── */
+[data-theme="dark"] .bg-grid,
+[data-theme="chrono"] .bg-grid {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-@utility collapse {
-  @apply rounded-[1rem];
+[data-theme="chrono-light"] .bg-grid,
+[data-theme="chrono-light"] .bg-grid {
+  background-image:
+    linear-gradient(oklch(0 0 0 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0 0 0 / 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-@layer utilities {
-  :root,
-  [data-theme] {
-    background: oklch(var(--b2));
-  }
+/* Fine grid — instrument panel feel */
+[data-theme="dark"] .bg-grid-fine,
+[data-theme="chrono"] .bg-grid-fine {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.015) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
 
-  body {
-    min-height: 100vh;
-  }
+[data-theme="chrono-light"] .bg-grid-fine,
+[data-theme="chrono-light"] .bg-grid-fine {
+  background-image:
+    linear-gradient(oklch(0 0 0 / 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0 0 0 / 0.02) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
 
-  h1,
-  h2,
-  h3,
-  h4 {
-    margin-bottom: 0.5rem;
-    line-height: 1;
-  }
+/* ── Radial Dial Pattern ─────────────────────────────────────────── */
+.bg-dial {
+  background-image: radial-gradient(
+    circle at center,
+    transparent 0%,
+    transparent 30%,
+    oklch(1 0 0 / 0.02) 30.5%,
+    transparent 31%,
+    transparent 50%,
+    oklch(1 0 0 / 0.015) 50.5%,
+    transparent 51%
+  );
+  background-size: 200px 200px;
+}
 
-  p {
-    margin: 1rem 0;
-  }
+[data-theme="chrono-light"] .bg-dial {
+  background-image: radial-gradient(
+    circle at center,
+    transparent 0%,
+    transparent 30%,
+    oklch(0 0 0 / 0.03) 30.5%,
+    transparent 31%,
+    transparent 50%,
+    oklch(0 0 0 / 0.02) 50.5%,
+    transparent 51%
+  );
+}
 
-  .btn {
-    @apply shadow-md;
-  }
+/* ═══════════════════════════════════════════════════════════════════════
+   GRADIENT EFFECTS
+   ═══════════════════════════════════════════════════════════════════════ */
 
-  html {
-    @apply overflow-y-scroll overflow-x-hidden;
-  }
+/* Brass gradient text */
+.text-gradient-brass {
+  background: linear-gradient(135deg, oklch(0.85 0.15 85), oklch(0.7 0.18 70));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  body {
-    @apply overflow-y-auto overflow-x-hidden;
-  }
+/* Teal gradient */
+.text-gradient-teal {
+  background: linear-gradient(
+    135deg,
+    oklch(0.65 0.15 195),
+    oklch(0.55 0.12 210)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  .modal {
-    @apply overflow-hidden;
-  }
+/* Primary gradient */
+.text-gradient-primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-accent)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  .modal-box {
-    @apply min-h-80 max-w-100 overflow-hidden;
-    transform: translateZ(0);
-  }
+/* ═══════════════════════════════════════════════════════════════════════
+   GLOW & AMBIENT EFFECTS
+   ═══════════════════════════════════════════════════════════════════════ */
 
-  .modal-backdrop,
-  .modal.backdrop-blur {
-    @apply fixed inset-0 overflow-hidden;
-  }
+/* Brass glow */
+[data-theme="dark"] .glow-brass,
+[data-theme="chrono"] .glow-brass {
+  box-shadow:
+    0 0 20px oklch(0.75 0.15 85 / 0.25),
+    0 0 40px oklch(0.75 0.15 85 / 0.1),
+    0 0 60px oklch(0.75 0.15 85 / 0.05);
+}
 
-  .btn.btn-ghost {
-    @apply shadow-none;
-  }
+[data-theme="chrono-light"] .glow-brass,
+[data-theme="chrono-light"] .glow-brass {
+  box-shadow:
+    0 0 16px oklch(0.6 0.16 85 / 0.2),
+    0 0 32px oklch(0.6 0.16 85 / 0.08);
+}
 
-  .circle-gradient {
-    border-radius: 630px;
-    background: #bd93f1;
-    filter: blur(229px);
-    position: absolute;
-    top: 0;
-  }
+/* Teal glow */
+[data-theme="dark"] .glow-teal,
+[data-theme="chrono"] .glow-teal {
+  box-shadow:
+    0 0 20px oklch(0.55 0.12 195 / 0.25),
+    0 0 40px oklch(0.55 0.12 195 / 0.1);
+}
 
-  .circle-gradient-blue {
-    border-radius: 630px;
-    background: #a6e8fe;
-    filter: blur(250px);
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
+[data-theme="chrono-light"] .glow-teal,
+[data-theme="chrono-light"] .glow-teal {
+  box-shadow:
+    0 0 16px oklch(0.5 0.12 195 / 0.2),
+    0 0 32px oklch(0.5 0.12 195 / 0.08);
+}
 
-  .border-gradient {
-    border: 1px solid #5c4fe5;
-  }
+/* Ambient primary glow */
+[data-theme="dark"] .glow-primary,
+[data-theme="chrono"] .glow-primary {
+  box-shadow:
+    0 0 24px oklch(0.75 0.15 85 / 0.2),
+    0 0 48px oklch(0.75 0.15 85 / 0.08);
+}
 
-  .bg-modal {
-    backdrop-filter: blur(7.449999809265137px);
-  }
+[data-theme="chrono-light"] .glow-primary,
+[data-theme="chrono-light"] .glow-primary {
+  box-shadow:
+    0 0 16px oklch(0.6 0.16 85 / 0.15),
+    0 0 32px oklch(0.6 0.16 85 / 0.05);
+}
 
-  .custom::after {
-    position: absolute !important;
-    display: block !important;
-    height: 0.5rem !important;
-    width: 0.5rem !important;
-    top: 1rem !important;
-    right: 1.4rem !important;
-    transform: translateY(-100%) rotate(45deg) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    content: "" !important;
-    box-shadow: 2px 2px !important;
-    pointer-events: none !important;
+/* ═══════════════════════════════════════════════════════════════════════
+   CARD STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Instrument Panel Card — brushed metal aesthetic */
+.card-instrument {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    oklch(0.12 0.02 255 / 0.8),
+    oklch(0.08 0.015 250 / 0.9)
+  );
+  border: 1px solid oklch(1 0 0 / 0.05);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.card-instrument::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    oklch(1 0 0 / 0.03) 0%,
+    transparent 50%,
+    oklch(1 0 0 / 0.01) 100%
+  );
+  pointer-events: none;
+}
+
+[data-theme="chrono-light"] .card-instrument {
+  background: linear-gradient(
+    145deg,
+    oklch(0.96 0.01 55 / 0.9),
+    oklch(0.98 0.005 55 / 0.95)
+  );
+  border: 1px solid oklch(0 0 0 / 0.06);
+}
+
+/* Bezel effect — watch-like border */
+.bezel {
+  position: relative;
+  border-radius: 0.5rem;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.05),
+    inset 0 -1px 0 oklch(0 0 0 / 0.1),
+    0 4px 12px oklch(0 0 0 / 0.2);
+}
+
+[data-theme="chrono-light"] .bezel {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.8),
+    inset 0 -1px 0 oklch(0 0 0 / 0.05),
+    0 4px 12px oklch(0 0 0 / 0.08);
+}
+
+/* ── Card Hover Effects ───────────────────────────────────────────── */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+}
+
+[data-theme="dark"] .card-hover:hover,
+[data-theme="chrono"] .card-hover:hover {
+  transform: translateY(-4px) scale(1.008);
+  box-shadow:
+    0 20px 50px oklch(0 0 0 / 0.5),
+    0 0 30px oklch(0.75 0.15 85 / 0.12);
+  border-color: oklch(0.75 0.15 85 / 0.3);
+}
+
+[data-theme="chrono-light"] .card-hover:hover {
+  transform: translateY(-4px) scale(1.008);
+  box-shadow:
+    0 16px 40px oklch(0.2 0.08 250 / 0.12),
+    0 0 30px oklch(0.6 0.16 85 / 0.12);
+  border-color: oklch(0.6 0.16 85 / 0.3);
+}
+
+/* ── Sophisticated Glass Card ────────────────────────────────────── */
+.card-glass {
+  position: relative;
+  background: oklch(0.12 0.02 255 / 0.4);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  border: 1px solid oklch(1 0 0 / 0.08);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.card-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    oklch(1 0 0 / 0.06) 0%,
+    transparent 40%,
+    oklch(0 0 0 / 0.02) 100%
+  );
+  pointer-events: none;
+}
+
+.card-glass::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.15),
+    transparent
+  );
+  pointer-events: none;
+}
+
+[data-theme="chrono-light"] .card-glass {
+  background: oklch(0.98 0.005 55 / 0.6);
+  border: 1px solid oklch(0 0 0 / 0.06);
+}
+
+/* ── Premium Elevated Card ───────────────────────────────────────── */
+.card-elevated {
+  position: relative;
+  background: oklch(0.1 0.02 255 / 0.6);
+  border: 1px solid oklch(1 0 0 / 0.06);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow:
+    0 4px 16px oklch(0 0 0 / 0.2),
+    inset 0 1px 0 oklch(1 0 0 / 0.04);
+}
+
+.card-elevated::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    oklch(0.75 0.12 85 / 0.05) 0%,
+    transparent 30%,
+    transparent 70%,
+    oklch(0.55 0.1 195 / 0.03) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Blueprint Card (technical schematic) ───────────────────────── */
+@keyframes blueprint-scroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
   }
 }
 
-@layer utilities {
-  .circle-gradient-dark {
-    position: absolute;
-    top: 0;
-    left: 60px;
-    border-radius: 630px;
-    background: #7353d2;
-    filter: blur(229px);
-  }
+[data-theme="dark"] .card-blueprint,
+[data-theme="chrono"] .card-blueprint {
+  background:
+    linear-gradient(oklch(0.1 0.03 85 / 0.4), oklch(0.1 0.03 85 / 0.4)),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      oklch(0.6 0.12 85 / 0.08) 39px,
+      oklch(0.6 0.12 85 / 0.08) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      oklch(0.6 0.12 85 / 0.08) 39px,
+      oklch(0.6 0.12 85 / 0.08) 40px
+    );
+  border: 1px dashed oklch(0.6 0.12 85 / 0.3);
+  background-size: 40px 40px;
+  animation: blueprint-scroll 12s linear infinite;
+}
 
-  .circle-gradient-blue-dark {
-    border-radius: 630px;
-    background: #0ea9ff;
-    filter: blur(250px);
-    position: absolute;
-    top: 0;
-    right: 0;
+[data-theme="chrono-light"] .card-blueprint,
+[data-theme="chrono-light"] .card-blueprint {
+  background:
+    linear-gradient(oklch(0.96 0.01 85 / 0.8), oklch(0.96 0.01 85 / 0.8)),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      oklch(0.5 0.1 85 / 0.15) 39px,
+      oklch(0.5 0.1 85 / 0.15) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      oklch(0.5 0.1 85 / 0.15) 39px,
+      oklch(0.5 0.1 85 / 0.15) 40px
+    );
+  border: 1px dashed oklch(0.5 0.1 85 / 0.4);
+  background-size: 40px 40px;
+}
+
+/* Corner marks */
+.corner-marks::before,
+.corner-marks::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: oklch(0.6 0.12 85 / 0.5);
+}
+
+.corner-marks::before {
+  top: 4px;
+  left: 4px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.corner-marks::after {
+  bottom: 4px;
+  right: 4px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TIMELINE & CONNECTOR STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Vertical timeline with gradient */
+.timeline-connector {
+  position: relative;
+}
+
+.timeline-connector::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary),
+    oklch(0.55 0.12 195),
+    transparent
+  );
+  border-radius: 1px;
+}
+
+[data-theme="chrono-light"] .timeline-connector::before {
+  opacity: 0.5;
+}
+
+/* Horizontal timeline (dial-style) */
+.timeline-dial {
+  position: relative;
+}
+
+.timeline-dial::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.1) 10%,
+    oklch(1 0 0 / 0.1) 90%,
+    transparent
+  );
+}
+
+[data-theme="chrono-light"] .timeline-dial::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0 0 0 / 0.08) 10%,
+    oklch(0 0 0 / 0.08) 90%,
+    transparent
+  );
+}
+
+/* Tick marks along timeline */
+.timeline-ticks {
+  background-image: repeating-linear-gradient(
+    90deg,
+    oklch(1 0 0 / 0.15) 0px,
+    oklch(1 0 0 / 0.15) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+[data-theme="chrono-light"] .timeline-ticks {
+  background-image: repeating-linear-gradient(
+    90deg,
+    oklch(0 0 0 / 0.1) 0px,
+    oklch(0 0 0 / 0.1) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+/* Accent line */
+.border-accent-line {
+  border-left: 2px solid var(--color-primary);
+  padding-left: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BADGE & STATUS STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Active status — pulsing glow */
+@keyframes pulse-brass {
+  0%,
+  100% {
+    box-shadow: 0 0 4px oklch(0.75 0.15 85 / 0.4);
+    opacity: 1;
   }
+  50% {
+    box-shadow: 0 0 12px oklch(0.75 0.15 85 / 0.6);
+    opacity: 0.9;
+  }
+}
+
+.badge-active {
+  animation: pulse-brass 2.5s ease-in-out infinite;
+}
+
+[data-theme="chrono-light"] .badge-active {
+  animation: pulse-brass 2.5s ease-in-out infinite;
+  opacity: 0.85;
+}
+
+/* Status dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-dot::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.3;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .tabs.tabs-box .tab.tab-active,
+[data-theme="chrono"] .tabs.tabs-box .tab.tab-active {
+  background: linear-gradient(
+    135deg,
+    oklch(0.75 0.15 85 / 0.15),
+    oklch(0.8 0.16 70 / 0.1)
+  );
+  border-bottom: 2px solid oklch(0.75 0.15 85);
+  color: oklch(0.9 0.02 85);
+}
+
+[data-theme="chrono-light"] .tabs.tabs-box .tab.tab-active,
+[data-theme="chrono-light"] .tabs.tabs-box .tab.tab-active {
+  background: linear-gradient(
+    135deg,
+    oklch(0.6 0.16 85 / 0.12),
+    oklch(0.65 0.14 70 / 0.08)
+  );
+  border-bottom: 2px solid oklch(0.6 0.16 85);
+  color: oklch(0.2 0.03 85);
+}
+
+/* Tab hover effect */
+[data-theme="dark"] .tabs.tabs-box .tab:hover:not(.tab-active),
+[data-theme="chrono"] .tabs.tabs-box .tab:hover:not(.tab-active) {
+  background: oklch(1 0 0 / 0.03);
+}
+
+[data-theme="chrono-light"] .tabs.tabs-box .tab:hover:not(.tab-active),
+[data-theme="chrono-light"] .tabs.tabs-box .tab:hover:not(.tab-active) {
+  background: oklch(0 0 0 / 0.02);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUTTON STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Primary button — brass accent */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    oklch(1 0 0 / 0.1) 0%,
+    transparent 50%,
+    oklch(0 0 0 / 0.05) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover::before {
+  opacity: 1;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px oklch(0.75 0.15 85 / 0.25);
+}
+
+/* Ghost button enhancement */
+.btn-ghost {
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: oklch(1 0 0 / 0.03);
+}
+
+[data-theme="chrono-light"] .btn-ghost:hover {
+  background: oklch(0 0 0 / 0.03);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUT STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.input-bordered {
+  transition: all 0.2s ease;
+  border-color: oklch(1 0 0 / 0.05);
+}
+
+.input-bordered:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px oklch(0.75 0.15 85 / 0.1);
+}
+
+[data-theme="chrono-light"] .input-bordered:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px oklch(0.6 0.16 85 / 0.1);
+}
+
+/* Number input without spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STAT & METRIC STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Stat with top accent line */
+.stat-accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-accent::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-accent),
+    var(--color-secondary)
+  );
+}
+
+/* Metric display — instrument readout style */
+.metric {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BACKDROP & OVERLAY STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="chrono-light"] .backdrop-blur,
+[data-theme="chrono-light"] .backdrop-blur {
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+}
+
+[data-theme="dark"] .backdrop-blur,
+[data-theme="chrono"] .backdrop-blur {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background: oklch(0.05 0.015 250 / 0.8);
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="chrono-light"] .modal-backdrop {
+  background: oklch(0.55 0.03 250 / 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Fade up entrance */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered delays */
+.delay-100 {
+  animation-delay: 100ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}
+.delay-400 {
+  animation-delay: 400ms;
+}
+.delay-500 {
+  animation-delay: 500ms;
+}
+.delay-600 {
+  animation-delay: 600ms;
+}
+.delay-700 {
+  animation-delay: 700ms;
+}
+.delay-800 {
+  animation-delay: 800ms;
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+
+/* Scale in */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Slide in from right */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px oklch(0.75 0.15 85 / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px oklch(0.75 0.15 85 / 0.5);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Rotate (for loading spinners) */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate {
+  animation: rotate 1s linear infinite;
+}
+
+/* Tick animation — second hand sweep */
+@keyframes tick-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-tick {
+  animation: tick-sweep 60s linear infinite;
+}
+
+/* Border flow animation */
+@keyframes border-flow {
+  0%,
+  100% {
+    border-color: var(--color-primary);
+  }
+  50% {
+    border-color: var(--color-accent);
+  }
+}
+
+.border-animated {
+  animation: border-flow 4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CURVE VISUALIZATION STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="chrono-light"] svg text,
+[data-theme="chrono-light"] svg text {
+  fill: oklch(0.25 0.02 250);
+}
+
+[data-theme="dark"] svg text,
+[data-theme="chrono"] svg text {
+  fill: oklch(0.88 0.01 250);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SPEC LINE STYLES (technical documentation)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.spec-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+}
+
+[data-theme="dark"] .spec-label,
+[data-theme="chrono"] .spec-label {
+  color: oklch(0.5 0.1 85 / 0.7);
+}
+
+[data-theme="chrono-light"] .spec-label,
+[data-theme="chrono-light"] .spec-label {
+  color: oklch(0.4 0.08 85 / 0.8);
+}
+
+[data-theme="dark"] .spec-value,
+[data-theme="chrono"] .spec-value {
+  color: oklch(0.88 0.03 85);
+}
+
+[data-theme="chrono-light"] .spec-value,
+[data-theme="chrono-light"] .spec-value {
+  color: oklch(0.2 0.02 85);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCANLINES (subtle CRT effect for dark mode)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .scanlines::after,
+[data-theme="chrono"] .scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    oklch(0 0 0 / 0.008) 2px,
+    oklch(0 0 0 / 0.008) 4px
+  );
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCROLLBAR STYLING
+   ═══════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.08 0.015 250);
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.25 0.03 250);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.35 0.03 250);
+}
+
+[data-theme="chrono-light"] ::-webkit-scrollbar-track {
+  background: oklch(0.92 0.01 55);
+}
+
+[data-theme="chrono-light"] ::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0.05 250);
+}
+
+[data-theme="chrono-light"] ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.55 0.05 250);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SELECTION STYLING
+   ═══════════════════════════════════════════════════════════════════════ */
+
+::selection {
+  background: oklch(0.75 0.15 85 / 0.3);
+  color: inherit;
+}
+
+[data-theme="chrono-light"] ::selection {
+  background: oklch(0.6 0.16 85 / 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FOCUS STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DIVIDER STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.divider {
+  position: relative;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.05) 20%,
+    oklch(1 0 0 / 0.05) 80%,
+    transparent
+  );
+}
+
+[data-theme="chrono-light"] .divider::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0 0 0 / 0.06) 20%,
+    oklch(0 0 0 / 0.06) 80%,
+    transparent
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TOOLTIP & DROPDOWN ENHANCEMENTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.dropdown-content {
+  box-shadow:
+    0 4px 16px oklch(0 0 0 / 0.3),
+    0 0 0 1px oklch(1 0 0 / 0.05);
+}
+
+[data-theme="chrono-light"] .dropdown-content {
+  box-shadow:
+    0 4px 16px oklch(0.2 0.08 250 / 0.1),
+    0 0 0 1px oklch(0 0 0 / 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOADING SPINNER — Clock-style
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.loading-spinner-clock {
+  width: 20px;
+  height: 20px;
+  border: 2px solid oklch(1 0 0 / 0.1);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: rotate 0.8s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Text truncation with ellipsis */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Glass effect */
+.glass {
+  background: oklch(0.12 0.02 255 / 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid oklch(1 0 0 / 0.05);
+}
+
+[data-theme="chrono-light"] .glass {
+  background: oklch(0.98 0.005 55 / 0.7);
+  border: 1px solid oklch(0 0 0 / 0.05);
+}
+
+/* Noise texture overlay */
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary),
+    var(--color-accent)
+  );
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.gradient-border:hover::before {
+  opacity: 0.8;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(1 0 0 / 0) 0%,
+    oklch(1 0 0 / 0.05) 50%,
+    oklch(1 0 0 / 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+[data-theme="chrono-light"] .shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0 0 0 / 0) 0%,
+    oklch(0 0 0 / 0.03) 50%,
+    oklch(0 0 0 / 0) 100%
+  );
+  background-size: 200% 100%;
 }

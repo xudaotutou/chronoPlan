@@ -1,6 +1,7 @@
 // To be used in JSON.stringify when a field might be bigint
 // https://wagmi.sh/react/faq#bigint-serialization
-import { Address } from "@starknet-start/chains";
+// Starknet address type
+export type Address = `0x${string}`;
 import { getChecksumAddress } from "starknet";
 
 export const replacer = (_key: string, value: unknown) => {
@@ -69,7 +70,9 @@ export function formatStrk(value: any): string {
     }
     if (typeof value === "number")
       return value === 0 ? "0 STRK" : (value / 1e18).toFixed(4) + " STRK";
-  } catch {}
+  } catch (error) {
+    console.warn("[formatStrk] Failed to format value:", error);
+  }
   return "0 STRK";
 }
 

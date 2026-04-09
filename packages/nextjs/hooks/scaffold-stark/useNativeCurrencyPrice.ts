@@ -1,25 +1,67 @@
-import { useEffect, useRef } from "react";
-import { useGlobalState } from "~~/services/store/store";
-import { priceService } from "~~/services/web3/PriceService";
+/**
+ * Manages native currency price using TanStack Query.
+ *
+ * Direct Avnu API calls from frontend (no backend proxy needed)
+ */
+
+// Avnu Price API endpoint (direct browser call)
+const AVNU_PRICE_API = "https://starknet.impulse.avnu.fi/v3/tokens/prices";
+
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { mainnetTokens } from "starkzap";
 
 /**
- * Manages native currency price polling and updates global state.
- * This hook starts polling for the native currency price and updates the global state
- * with price changes. It automatically cleans up the polling when the component unmounts.
- *
- * @returns {void} This hook doesn't return any value
+ * Fetch native currency (STRK) price from Avnu API directly
  */
-export const useNativeCurrencyPrice = () => {
-  const setNativeCurrencyPrice = useGlobalState(
-    (state) => state.setNativeCurrencyPrice,
+const fetchNativeCurrencyPrice = async (): Promise<number> => {
+  const strkAddress = mainnetTokens.STRK?.address?.toString();
+  if (!strkAddress) return 0;
+
+  const response = await fetch(AVNU_PRICE_API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ tokens: [strkAddress] }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch price: ${response.status}`);
+  }
+
+  const prices = await response.json();
+
+  // Find STRK price
+  const strkPrice = prices.find(
+    (p: any) => p.address.toLowerCase() === strkAddress.toLowerCase(),
   );
-  const ref = useRef<string>(priceService.getNextId().toString());
-  useEffect(() => {
-    const id = ref.current;
-    priceService.startPolling(id, setNativeCurrencyPrice);
-    return () => {
-      priceService.stopPolling(id);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+  // Prefer starknetMarket price, fallback to globalMarket
+  return strkPrice?.starknetMarket?.usd ?? strkPrice?.globalMarket?.usd ?? 0;
+};
+
+/**
+ * Hook that manages native currency price with TanStack Query.
+ * This no longer updates global state to avoid infinite render loops.
+ */
+export const useNativeCurrencyPrice = (): void => {
+  // No-op: This hook previously synced to Zustand, causing render loops.
+  // Use useNativeCurrencyPriceDirect() in components instead.
+};
+
+/**
+ * Direct hook to get price using TanStack Query.
+ * RECOMMENDED: Use this in components instead of global state.
+ */
+export const useNativeCurrencyPriceDirect = (): UseQueryResult<number> => {
+  return useQuery({
+    queryKey: ["native-currency-price"],
+    queryFn: fetchNativeCurrencyPrice,
+    staleTime: 5 * 60 * 1000, // 5 minutes - price does not need frequent updates
+    refetchInterval: false, // Disable auto-refetch
+    refetchOnWindowFocus: false, // Disable to prevent extra requests on tab switch
+    retry: 2,
+    retryDelay: (attemptIndex: number) =>
+      Math.min(1000 * 2 ** attemptIndex, 10000),
+  });
 };

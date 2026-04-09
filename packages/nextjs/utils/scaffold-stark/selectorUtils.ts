@@ -142,10 +142,3 @@ export function useFunctionNameFromSelector(selector: string): string {
   const { targetNetwork } = useTargetNetwork();
   return getFunctionNameFromSelector(selector, targetNetwork.network);
 }
-
-/**
- * Clear the selector cache (useful for testing or when contracts are updated)
- */
-export function clearSelectorCache(): void {
-  selectorCache.clear();
-}

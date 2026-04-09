@@ -1,5 +1,10 @@
 import scaffoldConfig from "~~/scaffold.config";
-import { Chain } from "@starknet-start/chains";
+// Local chain type definition
+type ChainNetwork = {
+  id: bigint;
+  network: string;
+  rpcUrls: { public: { http: readonly string[] } };
+};
 import { WebSocketChannel } from "starknet";
 
 // Cache one channel per ws url
@@ -22,7 +27,7 @@ const httpToWs = (httpUrl: string): string => {
   return wsBase;
 };
 
-export const getWsUrlForChain = (chain: Chain): string => {
+export const getWsUrlForChain = (chain: ChainNetwork): string => {
   const network = chain.network;
   const devnetWs = process.env.NEXT_PUBLIC_DEVNET_WS_PROVIDER_URL;
   const sepoliaWs = process.env.NEXT_PUBLIC_SEPOLIA_WS_PROVIDER_URL;
@@ -57,7 +62,7 @@ export const getWsUrlForChain = (chain: Chain): string => {
 };
 
 export const getSharedWebSocketChannel = async (
-  chain?: Chain,
+  chain?: ChainNetwork,
 ): Promise<WebSocketChannel | null> => {
   const target = chain || scaffoldConfig.targetNetworks[0];
   const wsUrl = getWsUrlForChain(target);

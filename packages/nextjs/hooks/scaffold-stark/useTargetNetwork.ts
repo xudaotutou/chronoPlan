@@ -1,33 +1,23 @@
-import { useEffect } from "react";
-import { useAccount } from "~~/hooks/useAccount";
+import { useMemo } from "react";
 import scaffoldConfig from "~~/scaffold.config";
-import { useGlobalState } from "~~/services/store/store";
 import { ChainWithAttributes } from "~~/utils/scaffold-stark";
-// import { NETWORKS_EXTRA_DATA } from "~~/utils/scaffold-stark";
 
 /**
- * Retrieves the target network based on the connected wallet or defaults to the first network.
- * This hook gets the network from the connected wallet's chainId and updates the global state
- * when the network changes. If no wallet is connected, it defaults to the first network in the config.
+ * Retrieves the target network from scaffold config.
  *
- * @returns {Object} An object containing:
- *   - targetNetwork: ChainWithAttributes - The target network with all its attributes and configuration
+ * NOTE: Previously this hook tried to sync with wallet chainId via Zustand,
+ * but this caused render loops when the wallet connected.
+ *
+ * Now returns the static config network to avoid re-renders.
  */
-export function useTargetNetwork(): { targetNetwork: ChainWithAttributes } {
-  const { chainId } = useAccount();
-  const targetNetwork = useGlobalState(({ targetNetwork }) => targetNetwork);
-  const setTargetNetwork = useGlobalState(
-    ({ setTargetNetwork }) => setTargetNetwork,
+export function useTargetNetwork(): {
+  targetNetwork: ChainWithAttributes;
+} {
+  // Simply return the configured network - don't try to sync with wallet
+  const targetNetwork = useMemo(
+    () => scaffoldConfig.targetNetworks[0],
+    [], // Empty deps = never changes
   );
-
-  useEffect(() => {
-    const newSelectedNetwork = scaffoldConfig.targetNetworks.find(
-      (targetNetwork) => targetNetwork.id === chainId,
-    );
-    if (newSelectedNetwork && newSelectedNetwork.id !== targetNetwork.id) {
-      setTargetNetwork(newSelectedNetwork);
-    }
-  }, [chainId, setTargetNetwork, targetNetwork.id]);
 
   return {
     targetNetwork,

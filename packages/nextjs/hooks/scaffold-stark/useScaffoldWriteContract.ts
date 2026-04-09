@@ -1,18 +1,15 @@
 import { useCallback } from "react";
 import { useTargetNetwork } from "./useTargetNetwork";
-import {
-  useDeployedContractInfo,
-  useTransactor,
-} from "~~/hooks/scaffold-stark";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
 import {
   ContractAbi,
   ContractName,
   ExtractAbiFunctionNamesScaffold,
   UseScaffoldWriteConfig,
 } from "~~/utils/scaffold-stark/contract";
-import { useNetwork } from "@starknet-start/react";
 import type { Abi } from "abi-wan-kanabi";
-import { Contract as StarknetJsContract } from "starknet";
+import { Contract as StarknetJsContract, type Call } from "starkzap";
+import { useContractWrite, useStarkZap } from "~~/hooks/useStarkZap";
 
 /**
  * Provides a function to write (send transactions) to a contract method.
@@ -29,7 +26,7 @@ import { Contract as StarknetJsContract } from "starknet";
  *   - isLoading: boolean - Boolean indicating if the transaction is in progress
  *   - error: Error | null - Any error encountered during the transaction
  *   - status: "idle" | "loading" | "success" | "error" - The transaction status
- *   - All other properties from sendTransactionInstance
+ *   - All other properties from useContractWrite
  * @see {@link https://scaffoldstark.com/docs/hooks/useScaffoldWriteContract}
  */
 export const useScaffoldWriteContract = <
@@ -45,9 +42,8 @@ export const useScaffoldWriteContract = <
   args,
 }: UseScaffoldWriteConfig<TAbi, TContractName, TFunctionName>) => {
   const { data: deployedContractData } = useDeployedContractInfo(contractName);
-  const { chain } = useNetwork();
-  const { writeTransaction: sendTxnWrapper, sendTransactionInstance } =
-    useTransactor();
+  const contractWrite = useContractWrite();
+  const { chainId, isConnected, isWrongNetwork } = useStarkZap();
   const { targetNetwork } = useTargetNetwork();
 
   const sendContractWriteTx = useCallback(
@@ -66,19 +62,19 @@ export const useScaffoldWriteContract = <
         );
         return;
       }
-      if (!chain?.id) {
+      if (!isConnected) {
         console.error("Please connect your wallet");
         return;
       }
-      if (chain?.id !== targetNetwork.id) {
+      if (isWrongNetwork) {
         console.error("You are on the wrong network");
         return;
       }
 
       // we convert to starknetjs contract instance here since deployed data may be undefined if contract is not deployed
       const contractInstance = new StarknetJsContract({
-        abi: deployedContractData.abi,
-        address: deployedContractData.address,
+        abi: deployedContractData?.abi,
+        address: deployedContractData?.address as `0x${string}`,
       });
 
       const newCalls = deployedContractData
@@ -86,24 +82,26 @@ export const useScaffoldWriteContract = <
         : [];
 
       try {
-        return await sendTxnWrapper(newCalls as any[]);
+        const result = await contractWrite.write(newCalls as Call[]);
+        return result.txHash;
       } catch (e: any) {
         throw e;
       }
     },
     [
       args,
-      chain?.id,
+      chainId,
       deployedContractData,
       functionName,
-      sendTransactionInstance,
-      sendTxnWrapper,
+      contractWrite,
+      isConnected,
+      isWrongNetwork,
       targetNetwork.id,
     ],
   );
 
   return {
-    ...sendTransactionInstance,
+    ...contractWrite,
     sendAsync: sendContractWriteTx,
   };
 };

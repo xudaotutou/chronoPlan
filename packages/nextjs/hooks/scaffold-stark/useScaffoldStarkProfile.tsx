@@ -1,7 +1,7 @@
-import * as chains from "@starknet-start/chains";
 import scaffoldConfig from "~~/scaffold.config";
 import { useEffect, useState } from "react";
 import { StarkProfile } from "starknet";
+import { supportedChains } from "~~/supportedChains";
 
 type network = "mainnet" | "sepolia" | "devnet";
 
@@ -10,27 +10,47 @@ const shouldUseProfile = () => {
   return (
     set.has(scaffoldConfig.targetNetworks[0].network) &&
     (scaffoldConfig.targetNetworks[0].network as network) !==
-      chains.devnet.network
+      supportedChains.devnet.network
   );
 };
 
 const starknetIdApiBaseUrl =
   (scaffoldConfig.targetNetworks[0].network as network) ===
-  chains.mainnet.network
+  supportedChains.mainnet.network
     ? "https://api.starknet.id"
     : "https://sepolia.api.starknet.id";
 
+// Validate address format (must be 0x + 64 hex chars)
+const isValidStarknetAddress = (addr: string): boolean => {
+  return /^0x[a-fA-F0-9]{64}$/.test(addr);
+};
+
 export const fetchProfileFromApi = async (address: string) => {
   try {
+    // Validate address before making API calls
+    if (!isValidStarknetAddress(address)) {
+      return { name: "", profilePicture: "" };
+    }
+
     const addrToDomainRes = await fetch(
       `${starknetIdApiBaseUrl}/addr_to_domain?addr=${address}`,
     );
 
+    // Don't throw on 400/404 - just return empty profile
+    if (addrToDomainRes.status === 400 || addrToDomainRes.status === 404) {
+      return { name: "", profilePicture: "" };
+    }
+
     if (!addrToDomainRes.ok) {
-      throw new Error(await addrToDomainRes.text());
+      return { name: "", profilePicture: "" };
     }
 
     const addrToDomainJson = await addrToDomainRes.json();
+
+    // Check if domain exists
+    if (!addrToDomainJson.domain) {
+      return { name: "", profilePicture: "" };
+    }
 
     const domain = addrToDomainJson.domain;
 
@@ -38,7 +58,14 @@ export const fetchProfileFromApi = async (address: string) => {
       `${starknetIdApiBaseUrl}/domain_to_data?domain=${domain}`,
     );
 
-    if (!profileRes.ok) throw new Error(await profileRes.text());
+    // Don't throw on 404 - just return empty profile
+    if (profileRes.status === 404) {
+      return { name: "", profilePicture: "" };
+    }
+
+    if (!profileRes.ok) {
+      return { name: "", profilePicture: "" };
+    }
 
     const profileData = await profileRes.json();
 
@@ -46,51 +73,31 @@ export const fetchProfileFromApi = async (address: string) => {
 
     const uriRes = await fetch(`${starknetIdApiBaseUrl}/uri?id=${id}`);
 
+    if (!uriRes.ok) {
+      return { name: "", profilePicture: "" };
+    }
+
     const uriData = await uriRes.json();
 
     return {
       name: profileData.domain.domain,
       profilePicture: uriData.image,
-      // TODO: figure out where these go in case we have PFP, because its a bit complex to parse the data
-      // discord?: string;
-      // twitter?: string;
-      // github?: string;
-      // proofOfPersonhood?: boolean;
     };
-  } catch (e) {
-    const error = e as Error;
-
-    // Suppress known "no data" error, log all others
-    if (error.message.includes("No data found")) {
-      console.log(
-        `The above error is because there is no profile for address: ${address}`,
-      );
-    } else {
-      console.error("Error fetching profile from API: ", error);
-    }
-
-    return {
-      name: "",
-      profilePicture: "",
-    };
+  } catch {
+    // Silently ignore all profile errors - profile is optional
+    return { name: "", profilePicture: "" };
   }
 };
 
 /**
  * Fetches Starknet profile information for a given address.
- * This hook is a workaround that re-implements the starknet-react profile hook with conditional rendering.
- * It only works on mainnet and sepolia networks (not devnet) and fetches profile data from the Starknet ID API.
- * Use this hook instead of the starknet-react version when conditional rendering or specific network support is needed.
+ * Only works on mainnet and sepolia networks (not devnet).
+ * Profile fetching errors are silently ignored - profile is optional.
  *
- * @param address - The Starknet address to fetch profile information for, typed as chains.Address | undefined
- * @returns {Object} An object containing:
- *   - data: StarkProfile | undefined - The profile data with name and profilePicture, or undefined if an error occurred; defaults to { name: "", profilePicture: "" } if disabled or no address
- *   - isLoading: boolean - Boolean indicating if the profile is currently loading
- * @see {@link https://scaffoldstark.com/docs/hooks/useScaffoldStarkProfile}
+ * @param address - The Starknet address to fetch profile for
+ * @returns Profile data with name and profilePicture
  */
-export const useScaffoldStarkProfile = (
-  address: chains.Address | undefined,
-) => {
+export const useScaffoldStarkProfile = (address: `0x${string}` | undefined) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<StarkProfile | undefined>();
   const isEnabled = shouldUseProfile();
@@ -107,9 +114,9 @@ export const useScaffoldStarkProfile = (
       .then((data) => {
         setProfile(data);
       })
-      .catch((e) => {
-        console.error(`[useScaffoldStarkProfile] ` + e.message);
-        setProfile(undefined);
+      .catch(() => {
+        // Silently ignore profile fetch errors
+        setProfile({ name: "", profilePicture: "" });
       })
       .finally(() => {
         setIsLoading(false);

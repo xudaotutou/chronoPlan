@@ -1,15 +1,42 @@
 import scaffoldConfig from "~~/scaffold.config";
+import { mainnetTokens } from "starkzap";
+
+// Avnu Price API endpoint (direct browser call)
+const AVNU_PRICE_API = "https://starknet.impulse.avnu.fi/v3/tokens/prices";
 
 export const fetchPrice = async (retries = 3): Promise<number> => {
+  const strkAddress = mainnetTokens.STRK?.address?.toString();
+  if (!strkAddress) return 0;
+
   let attempt = 0;
   while (attempt < retries) {
     try {
-      const response = await fetch(`/api/price`);
-      const data = await response.json();
-      return data.starknet.usd;
+      const response = await fetch(AVNU_PRICE_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tokens: [strkAddress] }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Avnu API error: ${response.status}`);
+      }
+
+      const prices = await response.json();
+
+      // Find STRK price
+      const strkPrice = prices.find(
+        (p: any) => p.address.toLowerCase() === strkAddress.toLowerCase(),
+      );
+
+      // Prefer starknetMarket price, fallback to globalMarket
+      return (
+        strkPrice?.starknetMarket?.usd ?? strkPrice?.globalMarket?.usd ?? 0
+      );
     } catch (error) {
       console.error(
-        `Attempt ${attempt + 1} - Error fetching STRK price from Coingecko: `,
+        `Attempt ${attempt + 1} - Error fetching STRK price from Avnu: `,
         error,
       );
       attempt++;

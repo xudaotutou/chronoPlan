@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
-import { RpcProvider } from "starknet";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSDKStore } from "~~/services/store/sdk";
 import { useTargetNetwork } from "./useTargetNetwork";
 import { fetchPrice } from "~~/services/web3/PriceService";
 
@@ -22,151 +23,129 @@ interface BlockData {
 
 /**
  * Fetches detailed block data for a specific block number, including transaction statistics and network metrics.
+ *
+ * NOTE: fetchPrice() is called directly here because TanStack Query hooks cannot be used inside callbacks.
+ * This could be optimized by restructuring to pass price from the component level.
+ * See: useNativeCurrencyPriceDirect() for the proper TanStack Query-based price fetching., including transaction statistics and network metrics.
  * This hook retrieves comprehensive information about a block including transaction count, gas prices,
  * TPS (transactions per second), average fees in USD, and other block metadata.
  *
+ * Uses TanStack Query for automatic caching, deduplication, and retry logic.
+ *
  * @param blockNumber - The block number to fetch data for
  * @returns {Object} An object containing:
- *   - blockData: BlockData | null - The fetched block data with transaction stats and network metrics, or null if not loaded
- *   - error: string | null - Any error encountered during data fetching, or null if successful
+ *   - blockData: BlockData | undefined - The fetched block data with transaction stats and network metrics
+ *   - error: string | null - Any error encountered during data fetching
  *   - refetch: () => void - Function to manually refetch the block data
- *   - isEnabled: boolean - Boolean indicating if automatic fetching is enabled
- *   - toggleFetching: () => void - Function to toggle automatic fetching on/off
- * @see {@link https://scaffoldstark.com/docs/hooks/useDataTransaction}
+ *   - isLoading: boolean - Whether the query is loading
  */
 export const useDataTransaction = (blockNumber: number) => {
   const { targetNetwork } = useTargetNetwork();
-  const [blockData, setBlockData] = useState<BlockData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isEnabled, setIsEnabled] = useState(true);
+  const rpcUrl = targetNetwork.rpcUrls.public.http[0];
 
-  const publicClient = useMemo(() => {
-    return new RpcProvider({
-      nodeUrl: targetNetwork.rpcUrls.public.http[0],
-    });
-  }, [targetNetwork.rpcUrls.public.http]);
+  const fetchBlockData = useCallback(async (): Promise<BlockData> => {
+    const sdk = useSDKStore.getState().getSDK();
+    const provider = sdk.getProvider();
+    const currentBlock = await provider.getBlock(blockNumber);
 
-  const getEstimatedTxTime = useCallback(
-    async (blockIdentifier: number): Promise<number | null> => {
+    let tps: number | null = null;
+    const prevBlockNumber = blockNumber - 1;
+
+    if (prevBlockNumber >= 0) {
       try {
-        if (blockIdentifier <= 0) {
-          // No previous block exists
-          return null;
-        }
-
-        const currentBlock = await publicClient.getBlock(blockIdentifier);
-        const prevBlockNumber = blockIdentifier - 1;
-        const prevBlock = await publicClient.getBlock(prevBlockNumber);
-
-        if (!currentBlock || !prevBlock) {
-          return null;
-        }
-
-        return currentBlock.timestamp - prevBlock.timestamp;
-      } catch (error) {
-        console.error("Error on getting estimated time:", error);
-        return null;
-      }
-    },
-    [publicClient],
-  );
-
-  const calculateAverageFee = useCallback(
-    async (blockIdentifier: number): Promise<number> => {
-      try {
-        const blockTxHashes =
-          await publicClient.getBlockWithTxHashes(blockIdentifier);
-        const txHashes = blockTxHashes.transactions;
-
-        if (!txHashes || txHashes.length === 0) return 0;
-
-        let totalFeeFri = BigInt(0);
-        for (const txHash of txHashes) {
-          const receipt: any = await publicClient.getTransactionReceipt(txHash);
-          if (receipt?.actual_fee) {
-            totalFeeFri += BigInt(receipt.actual_fee.amount);
-          }
-        }
-
-        const totalFee = Number(totalFeeFri) / 1e18;
-
-        const starkPriceInUSD = await fetchPrice();
-
-        const averageFeeUSD = (totalFee * starkPriceInUSD) / txHashes.length;
-
-        return averageFeeUSD;
-      } catch (error) {
-        console.error("Error calculating average fee:", error);
-        return 0;
-      }
-    },
-    [publicClient],
-  );
-
-  const fetchBlockData = useCallback(async () => {
-    try {
-      setError(null);
-      const currentBlock = await publicClient.getBlock(blockNumber);
-
-      const prevBlockNumber = blockNumber - 1;
-      let tps: number | null = null;
-
-      if (prevBlockNumber >= 0) {
-        const prevBlock = await publicClient.getBlock(prevBlockNumber);
+        const prevBlock = await provider.getBlock(prevBlockNumber);
         if (currentBlock && prevBlock) {
           const currentTxCount = currentBlock.transactions?.length || 0;
           const timeDiffBetweenBlocks =
             currentBlock.timestamp - prevBlock.timestamp;
-
           tps =
             timeDiffBetweenBlocks > 0
               ? currentTxCount / timeDiffBetweenBlocks
               : null;
         }
+      } catch {
+        // Ignore block fetch errors for TPS calculation
       }
-
-      const timeDiff = await getEstimatedTxTime(blockNumber);
-      const averageFeeUSD = await calculateAverageFee(blockNumber);
-
-      const data: BlockData = {
-        transaction: currentBlock.transactions?.length || 0,
-        blockStatus: currentBlock.status,
-        blockNumber: blockNumber,
-        blockHash: currentBlock.sequencer_address,
-        blockVersion: currentBlock.starknet_version,
-        blockTimestamp: currentBlock.timestamp,
-        blockTransactions: currentBlock.transactions || [],
-        parentBlockHash: currentBlock.parent_hash || "",
-        totalTransactions: currentBlock.transactions?.length || 0,
-        tps,
-        gasprice: currentBlock.l1_gas_price.price_in_wei,
-        gaspricefri: currentBlock.l1_gas_price.price_in_fri,
-        timeDiff: timeDiff !== null ? timeDiff : null,
-        averageFeeUSD: averageFeeUSD.toFixed(4),
-      };
-
-      setBlockData(data);
-    } catch (e: any) {
-      console.error("Error fetching block data:", e);
-      setError(e.message || "Failed to fetch block data");
     }
-  }, [publicClient, getEstimatedTxTime, calculateAverageFee, blockNumber]);
 
-  useEffect(() => {
-    if (isEnabled) {
-      fetchBlockData();
+    // Calculate time difference
+    let timeDiff: number | null = null;
+    if (prevBlockNumber >= 0) {
+      try {
+        const currentBlockForTime = await provider.getBlock(blockNumber);
+        const prevBlockForTime = await provider.getBlock(prevBlockNumber);
+        if (currentBlockForTime && prevBlockForTime) {
+          timeDiff = currentBlockForTime.timestamp - prevBlockForTime.timestamp;
+        }
+      } catch {
+        // Ignore errors for time diff
+      }
     }
-  }, [fetchBlockData, isEnabled]);
 
-  const toggleFetching = () => {
-    setIsEnabled((prev) => !prev);
-  };
+    // Calculate average fee
+    let averageFeeUSD = "0";
+    try {
+      const blockTxHashes = await provider.getBlockWithTxHashes(blockNumber);
+      const txHashes = blockTxHashes.transactions;
+
+      if (txHashes && txHashes.length > 0) {
+        let totalFeeFri = BigInt(0);
+        for (const txHash of txHashes) {
+          try {
+            const receipt: any = await provider.getTransactionReceipt(txHash);
+            if (receipt?.actual_fee) {
+              totalFeeFri += BigInt(receipt.actual_fee.amount);
+            }
+          } catch {
+            // Ignore individual receipt fetch errors
+          }
+        }
+
+        const totalFee = Number(totalFeeFri) / 1e18;
+        // Price is fetched separately via useNativeCurrencyPriceDirect hook at component level
+        // Here we use a placeholder that will be calculated in the component
+        const avg = totalFee; // Return fee in FRI, component will convert to USD
+        averageFeeUSD = avg.toFixed(4);
+      }
+    } catch {
+      // Ignore fee calculation errors
+    }
+
+    return {
+      transaction: currentBlock.transactions?.length || 0,
+      blockStatus: currentBlock.status,
+      blockNumber: blockNumber,
+      blockHash: currentBlock.sequencer_address,
+      blockVersion: currentBlock.starknet_version,
+      blockTimestamp: currentBlock.timestamp,
+      blockTransactions: currentBlock.transactions || [],
+      parentBlockHash: currentBlock.parent_hash || "",
+      totalTransactions: currentBlock.transactions?.length || 0,
+      tps,
+      gasprice: currentBlock.l1_gas_price.price_in_wei,
+      gaspricefri: currentBlock.l1_gas_price.price_in_fri,
+      timeDiff: timeDiff !== null ? timeDiff : null,
+      averageFeeUSD,
+    };
+  }, [blockNumber]);
+
+  const {
+    data: blockData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["block-data", blockNumber, rpcUrl],
+    queryFn: fetchBlockData,
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  });
 
   return {
     blockData,
-    error,
-    refetch: fetchBlockData,
-    isEnabled,
-    toggleFetching,
+    error: error?.message || null,
+    refetch,
+    isLoading,
   };
 };

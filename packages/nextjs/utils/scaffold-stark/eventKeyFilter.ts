@@ -1,7 +1,4 @@
-import {
-  ExtractAbiEvent,
-  ExtractAbiEventNames,
-} from "abi-wan-kanabi/dist/kanabi";
+import { ExtractAbiEvent, ExtractAbiEventNames } from "abi-wan-kanabi/kanabi";
 import {
   Abi,
   AbiEntry,

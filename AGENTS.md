@@ -1954,3 +1954,335 @@ Install skills with: `npx skills add keep-starknet-strange/starknet-agentic/skil
 - **Cairo contracts** for agent accounts with session keys, registries, and transaction provenance
 
 See the [starknet-agentic README](https://github.com/keep-starknet-strange/starknet-agentic) for full documentation and setup instructions.
+
+
+
+---
+
+# ChronoPlan - Modular TWAMM Schedule System
+
+## Overview
+
+ChronoPlan is a modular Time-Weighted Average Mass Meeting (TWAMM) schedule system built on Starknet. It enables programmatic token release schedules with pluggable curves, recipient validators, and governance models.
+
+## Architecture
+
+```
+chrono_plan/
+├── domain/                    # [Core Layer] Pure logic, no external dependencies
+│   ├── types/
+│   │   ├── schedule.cairo    # DeploymentSpec, CurveMetadata, PlanStatus, VersionInfo
+│   │   └── events.cairo      # ScheduleCreated, Claimed, CurveRegistered, etc.
+│   └── traits/
+│       ├── curve.cairo        # ICurveAlgorithm
+│       ├── recipient.cairo     # IRecipientValidator
+│       └── governance.cairo   # IGovernance
+│
+├── infrastructure/            # [Infrastructure Layer] External interactions
+│   └── adapters/
+│       ├── token.cairo         # ITokenAdapter
+│       └── time.cairo          # ITimeSource
+│
+├── interfaces/                # [Interface Layer] External contracts
+│   ├── i_factory.cairo       # IFactory
+│   ├── i_schedule.cairo      # ISchedule
+│   └── i_upgradeable.cairo   # IUpgradeable
+│
+└── application/               # [Application Layer] Business orchestration
+    ├── factory.cairo         # Factory (OZ Ownable)
+    ├── registry.cairo        # Version registry (OZ Ownable)
+    └── schedule_proxy.cairo  # Schedule (OZ Ownable + Upgradeable)
+```
+
+## Dependencies
+
+Uses OpenZeppelin Contracts for Cairo for standard patterns:
+
+```toml
+# Scarb.toml
+[dependencies]
+starknet = "2.8.0"
+openzeppelin = "3.0.0"
+```
+
+## Module Dependency Rules
+
+Allowed dependencies:
+- `application` → `domain`, `infrastructure`, `interfaces`
+- `infrastructure` → `domain`
+- `domain` → (nothing, pure layer)
+- `interfaces` → `domain`, `domain::types`
+
+Forbidden:
+- Circular dependencies
+- Cross-layer direct calls (must go through interfaces)
+
+## Domain Layer
+
+### Types (`domain/types/`) - Core Data Structures
+
+```cairo
+// domain/types/schedule.cairo
+#[derive(Drop, Serde, starknet::Store, Clone)]
+pub struct DeploymentSpec {
+    pub recipient: ContractAddress,
+    pub amount: u256,
+    pub start_time: u64,
+    pub duration: u64,
+    pub curve_key: felt252,
+    pub curve_params: felt252,
+    pub token_address: ContractAddress,
+    pub governance_address: ContractAddress,
+}
+
+#[derive(Drop, PartialEq, Serde, Clone)]
+pub enum PlanStatus {
+    Active,
+    Completed,
+    Closed
+}
+```
+
+### Events (`domain/types/events.cairo`)
+
+Key events:
+- `ScheduleCreated` - Emitted when plan is created
+- `Claimed` - Emitted on token claim
+- `ScheduleClosed` - Emitted when plan is closed by governance
+- `ScheduleCompleted` - Emitted when all tokens released
+- `CurveRegistered` - Emitted when curve implementation registered
+
+### Traits (`domain/traits/`) - Interfaces
+
+#### ICurveAlgorithm
+```cairo
+#[starknet::interface]
+pub trait ICurveAlgorithm<TContractState> {
+    fn calculate(self: @TContractState, amount: u256, params: felt252, elapsed: u64, duration: u64) -> u256;
+    fn validate_params(self: @TContractState, params: felt252) -> bool;
+    fn name(self: @TContractState) -> felt252;
+    fn version(self: @TContractState) -> felt252;
+}
+```
+
+#### IRecipientValidator
+```cairo
+#[starknet::interface]
+pub trait IRecipientValidator<TContractState> {
+    fn validate(self: @TContractState, address: ContractAddress) -> bool;
+    fn can_receive_token(self: @TContractState, address: ContractAddress, token: ContractAddress) -> bool;
+    fn type_id(self: @TContractState) -> felt252;
+    fn version(self: @TContractState) -> felt252;
+}
+```
+
+#### IGovernance
+
+Supports multiple governance modes:
+
+| Mode | Implementation | Use Case |
+|------|---------------|---------|
+| SINGLE_ADMIN | EOA or Ownable contract | Simple control |
+| MULTISIG | Argent/Braavos/custom multisig | Team treasury |
+| DAO | OpenZeppelin Governor | Decentralized |
+
+```cairo
+#[starknet::interface]
+pub trait IGovernance<TContractState> {
+    fn is_governance(self: @TContractState, caller: ContractAddress) -> bool;
+    fn refund_address(self: @TContractState) -> ContractAddress;
+    fn is_emergency_admin(self: @TContractState, caller: ContractAddress) -> bool;
+    fn version(self: @TContractState) -> felt252;
+    fn governance_type(self: @TContractState) -> felt252;
+}
+```
+
+## Infrastructure Layer
+
+### Adapters (`infrastructure/adapters/`)
+
+#### ITokenAdapter
+```cairo
+#[starknet::interface]
+pub trait ITokenAdapter<TContractState> {
+    fn transfer(ref self: TContractState, to: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(ref self: TContractState, from: ContractAddress, to: ContractAddress, amount: u256) -> bool;
+    fn balance_of(self: @TContractState, account: ContractAddress) -> u256;
+    fn decimals(self: @TContractState) -> u8;
+    fn token_address(self: @TContractState) -> ContractAddress;
+}
+```
+
+#### ITimeSource
+```cairo
+#[starknet::interface]
+pub trait ITimeSource<TContractState> {
+    fn now(self: @TContractState) -> u64;
+    fn block_number(self: @TContractState) -> u64;
+    fn is_valid_timestamp(self: @TContractState, timestamp: u64) -> bool;
+}
+```
+
+## Interfaces Layer
+
+### IFactory
+```cairo
+#[starknet::interface]
+pub trait IFactory<TContractState> {
+    fn deploy_schedule(ref self: TContractState, spec: DeploymentSpec) -> ContractAddress;
+    fn register_curve(ref self: TContractState, curve_key: felt252, impl_class: ClassHash, metadata: CurveMetadata);
+    fn get_curve_impl(self: @TContractState, curve_key: felt252) -> ClassHash;
+    fn list_registered_curves(self: @TContractState) -> Array<felt252>;
+    fn version(self: @TContractState) -> felt252;
+}
+```
+
+### ISchedule
+```cairo
+#[starknet::interface]
+pub trait ISchedule<TContractState> {
+    // User Operations
+    fn claim(ref self: TContractState);
+    fn get_available(self: @TContractState) -> u256;
+    fn get_status(self: @TContractState) -> PlanStatus;
+
+    // Governance Operations
+    fn close(ref self: TContractState, refund_address: ContractAddress);
+    fn finalize(ref self: TContractState);
+
+    // Query Operations
+    fn get_recipient(self: @TContractState) -> ContractAddress;
+    fn get_amount(self: @TContractState) -> u256;
+    fn get_claimed(self: @TContractState) -> u256;
+
+    // Upgrade Operations
+    fn upgrade(ref self: TContractState, new_impl: ClassHash);
+    fn get_implementation(self: @TContractState) -> ClassHash;
+}
+```
+
+## OpenZeppelin Integration
+
+ChronoPlan uses OpenZeppelin Contracts for Cairo (v3.0.0) for standard patterns:
+
+### Access Control
+
+Use `openzeppelin::access::ownable::OwnableComponent` with the `#[with_components]` macro:
+
+```cairo
+use openzeppelin::access::ownable::OwnableComponent;
+
+// In the contract module, replace component!() + impl declarations with:
+#[with_components((((OwnableComponent, ownable, OwnableEvent),)))]
+
+// In constructor:
+self.ownable.initializer(owner);
+
+// In admin functions:
+self.ownable.assert_only_owner();
+
+```
+
+### Upgradeability
+
+Use `openzeppelin::upgrades::UpgradeableComponent` with the `#[with_components]` macro:
+
+```cairo
+use openzeppelin::upgrades::UpgradeableComponent;
+
+// In the contract module, replace component!() + impl declarations with:
+#[with_components((((UpgradeableComponent, upgradeable, UpgradeableEvent),)))]
+
+// In upgrade function:
+self.upgradeable.upgrade(new_class_hash);
+```
+
+### Full Example
+
+```cairo
+#[starknet::contract]
+mod MyContract {
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::upgrades::UpgradeableComponent;
+    use starknet::ContractAddress;
+
+    // Replace component!() + impl declarations with a single macro:
+    #[with_components((((OwnableComponent, ownable, OwnableEvent),
+                             (UpgradeableComponent, upgradeable, UpgradeableEvent),)))]
+
+    #[storage]
+    struct Storage {
+        // Storage fields — no #[substorage(v0)] needed
+        ownable: OwnableComponent::Storage,
+        upgradeable: UpgradeableComponent::Storage,
+    }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        // Event variants — no #[flat] needed
+        OwnableEvent: OwnableComponent::Event,
+        UpgradeableEvent: UpgradeableComponent::Event,
+    }
+
+    #[constructor]
+    fn constructor(ref self: ContractState, owner: ContractAddress) {
+        self.ownable.initializer(owner);
+    }
+}
+```
+
+## Current Status
+
+### Completed
+- Domain types: `DeploymentSpec`, `CurveMetadata`, `PlanStatus`, `VersionInfo`
+- Domain events: `ScheduleCreated`, `Claimed`, `ScheduleClosed`, `ScheduleCompleted`, `CurveRegistered`, `CurveUpdated`
+- Domain traits: `ICurveAlgorithm`, `IRecipientValidator`, `IGovernance`
+- Infrastructure adapters: `ITokenAdapter`, `ITimeSource`
+- External interfaces: `IFactory`, `ISchedule`, `IUpgradeable`
+
+### Implementation Status
+
+**Completed:**
+- `application/factory.cairo` - Factory with Ownable + Upgradeable + Pausable
+- `application/registry.cairo` - Version registry
+- `application/schedule_proxy.cairo` - Schedule with flexible governance
+  - Single-admin: Ownable pattern
+  - Multisig/DAO: Set governance_address to multisig/Governor contract
+
+### TODO (Infrastructure)
+
+**Infrastructure Implementations** (`infrastructure/implementations/`):
+- `curves/` - Linear, Cliff, ExpDecay curve implementations
+- `recipients/` - EOAOnly, ContractAllowed validators
+- `governance/` - SingleAdmin, Multisig, DAO governance implementations
+
+### OpenZeppelin Security Module
+
+Factory uses `PausableComponent` for emergency stop:
+
+```cairo
+// In factory.cairo
+use openzeppelin_security::PausableComponent;
+
+// In the contract module, replace component!() + impl with:
+#[with_components((((PausableComponent, pausable, PausableEvent),)))]
+
+// Pause/unpause functions
+fn pause(ref self: ContractState) {
+    self.ownable.assert_only_owner();
+    self.pause();
+}
+
+fn unpause(ref self: ContractState) {
+    self.ownable.assert_only_owner();
+    self.unpause();
+}
+
+// Use in sensitive operations
+fn deploy_schedule(...) {
+    self.assert_not_paused(); // Reverts if paused
+    // ...
+}
+```
+

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "skills": {
+    "develop-secure-contracts": {
+      "source": "OpenZeppelin/openzeppelin-skills",
+      "sourceType": "github",
+      "computedHash": "2dff839990d5ac6ecaf1b7a9ce9588320779de05b8d00b9ab3cc6cf31bea8887"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "setup-cairo-contracts": {
+      "source": "OpenZeppelin/openzeppelin-skills",
+      "sourceType": "github",
+      "computedHash": "0a563050fa22541d76890c862bc02a403e9f8590419a722d145dcf3df5578489"
+    },
+    "upgrade-cairo-contracts": {
+      "source": "OpenZeppelin/openzeppelin-skills",
+      "sourceType": "github",
+      "computedHash": "33640799e05560f506949e37ce80fb237dba82542980a7b35d66f3268cfcf141"
+    },
+    "vitest": {
+      "source": "onmax/nuxt-skills",
+      "sourceType": "github",
+      "computedHash": "04ed1b09da8ac778d693ad12fab49b1c48aadfe1758fe13eb4d6de3fdcbb22f4"
+    }
+  }
+}

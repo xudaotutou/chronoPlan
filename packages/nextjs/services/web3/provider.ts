@@ -1,10 +1,16 @@
 import scaffoldConfig from "~~/scaffold.config";
-import { jsonRpcProvider } from "@starknet-start/providers";
-import { Chain } from "@starknet-start/chains";
+import { RpcProvider } from "starknet";
 
 // Get the current target network (first one in the array)
 const currentNetwork = scaffoldConfig.targetNetworks[0];
 const currentNetworkName = currentNetwork.network;
+
+// Public RPC URLs as fallback (no API key required)
+const PUBLIC_RPC_URLS = {
+  devnet: "http://127.0.0.1:5050",
+  sepolia: "https://starknet-sepolia.public.blastapi.io/rpc/v0_9",
+  mainnet: "https://starknet-mainnet.public.blastapi.io/rpc/v0_9",
+};
 
 export const getRpcUrl = (networkName: string): string => {
   const devnetRpcUrl = process.env.NEXT_PUBLIC_DEVNET_PROVIDER_URL;
@@ -15,20 +21,16 @@ export const getRpcUrl = (networkName: string): string => {
 
   switch (networkName) {
     case "devnet":
-      rpcUrl = devnetRpcUrl || "http://127.0.0.1:5050";
+      rpcUrl = devnetRpcUrl || PUBLIC_RPC_URLS.devnet;
       break;
     case "sepolia":
-      rpcUrl =
-        sepoliaRpcUrl ||
-        "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_10/_hKu4IgnPgrF8O82GLuYU";
+      rpcUrl = sepoliaRpcUrl || PUBLIC_RPC_URLS.sepolia;
       break;
     case "mainnet":
-      rpcUrl =
-        mainnetRpcUrl ||
-        "https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_10/_hKu4IgnPgrF8O82GLuYU";
+      rpcUrl = mainnetRpcUrl || PUBLIC_RPC_URLS.mainnet;
       break;
     default:
-      rpcUrl = "http://127.0.0.1:5050";
+      rpcUrl = PUBLIC_RPC_URLS.devnet;
       break;
   }
 
@@ -38,19 +40,17 @@ export const getRpcUrl = (networkName: string): string => {
 // Get RPC URL for the current network
 const rpcUrl = getRpcUrl(currentNetworkName);
 
-// Important: if the rpcUrl is empty (not configured in .env), we use the publicProvider
-// which randomly choose a provider from the chain list of public providers.
-// Some public provider might have strict rate limits.
-if (rpcUrl === "") {
+// Warn if using public provider
+if (
+  !process.env[`NEXT_PUBLIC_${currentNetworkName.toUpperCase()}_PROVIDER_URL`]
+) {
   console.warn(
     `No RPC Provider URL configured for ${currentNetworkName}. Using public provider.`,
   );
 }
 
-const provider = jsonRpcProvider({
-  rpc: (_chain: Chain) => ({
-    nodeUrl: getRpcUrl(_chain.network),
-  }),
+const provider = new RpcProvider({
+  nodeUrl: rpcUrl,
 });
 
 export default provider;

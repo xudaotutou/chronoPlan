@@ -2,12 +2,12 @@ import {
   ChevronDownIcon,
   ArrowLeftEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { useDisconnect } from "@starknet-start/react";
 import { notification } from "~~/utils/scaffold-stark";
+import { useStarkZap } from "~~/hooks/useStarkZap";
 import { useLocalStorage } from "usehooks-ts";
 
 export const WrongNetworkDropdown = () => {
-  const { disconnect } = useDisconnect();
+  const { disconnect } = useStarkZap();
   const [, setWasDisconnectedManually] = useLocalStorage<boolean>(
     "wasDisconnectedManually",
     false,
@@ -44,7 +44,7 @@ export const WrongNetworkDropdown = () => {
         {/* <NetworkOptions /> */}
         <li>
           <button
-            className="menu-item text-error btn-sm rounded-xl! flex gap-3 py-3"
+            className="menu-item btn-sm rounded-xl flex gap-3 py-3 text-base-content"
             type="button"
             onClick={handleDisconnect}
           >

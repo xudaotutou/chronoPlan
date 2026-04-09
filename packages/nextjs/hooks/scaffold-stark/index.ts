@@ -6,3 +6,8 @@ export * from "./useTransactor";
 export * from "./useAutoConnect";
 export * from "./useSwitchNetwork";
 export * from "./useScaffoldWebSocketEvents";
+export * from "./useScaffoldReadContract";
+export * from "./useScaffoldWriteContract";
+export * from "./useScaffoldContract";
+export * from "./useScaffoldMultiWriteContract";
+export * from "./useScaffoldEventHistory";

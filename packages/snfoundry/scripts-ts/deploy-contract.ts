@@ -509,6 +509,74 @@ const deployContract = async (
   };
 };
 
+/**
+ * Declare a contract class without deploying.
+ * Use this for contracts that will be deployed later via Factory pattern.
+ *
+ * @param params - Parameters for declaring the contract
+ * @param params.contract - The contract name (matches filename in target/dev)
+ * @param params.contractName - Optional name for export (defaults to contract name)
+ * @returns {Promise<{ classHash: string }>} The declared class hash
+ *
+ * @example
+ * const { classHash } = await declareContract({
+ *   contract: "MyContract",
+ *   contractName: "MyContract",
+ * });
+ */
+const declareContract = async (params: {
+  contract: string;
+  contractName?: string;
+}): Promise<{ classHash: string }> => {
+  const { contract, contractName } = params;
+  let compiledContractCasm;
+  let compiledContractSierra;
+
+  try {
+    compiledContractCasm = JSON.parse(
+      fs
+        .readFileSync(findContractFile(contract, "compiled_contract_class"))
+        .toString("ascii")
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      console.error(red(`The contract "${contract}" compiled class not found`));
+    } else {
+      console.error(red("Error reading compiled contract class file: "), error);
+    }
+    return { classHash: "" };
+  }
+
+  try {
+    compiledContractSierra = JSON.parse(
+      fs
+        .readFileSync(findContractFile(contract, "contract_class"))
+        .toString("ascii")
+    );
+  } catch (error) {
+    console.error(red("Error reading contract class file: "), error);
+    return { classHash: "" };
+  }
+
+  console.log(yellow("Declaring Contract "), contractName || contract);
+
+  const { classHash } = await declareIfNot_NotWait({
+    contract: compiledContractSierra,
+    casm: compiledContractCasm,
+  });
+
+  console.log(green("Contract Declared: "), classHash);
+
+  const finalContractName = contractName || contract;
+  deployments[finalContractName] = {
+    classHash: classHash,
+    address: null, // Not deployed - used as template
+    contract: contract,
+  };
+
+  return { classHash };
+};
+
 const executeDeployCalls = async (options?: UniversalDetails) => {
   if (deployCalls.length < 1) {
     throw new Error(
@@ -747,8 +815,34 @@ const assertDeployerSignable = async () => {
   }
 };
 
+/**
+ * Invoke a function on a deployed contract.
+ *
+ * @param contractAddress - Target contract address
+ * @param functionName - Function to invoke
+ * @param calldata - Calldata for the function
+ */
+const invokeContract = async (
+  contractAddress: string,
+  functionName: string,
+  calldata: string[]
+): Promise<{ transaction_hash: string }> => {
+  const call = {
+    contractAddress,
+    entrypoint: functionName,
+    calldata,
+  };
+
+  const executeOptions = networkName === "devnet" ? { tip: 1000n } : {};
+  const { transaction_hash } = await deployer.execute([call], executeOptions);
+
+  return { transaction_hash };
+};
+
 export {
   deployContract,
+  declareContract,
+  invokeContract,
   provider,
   deployer,
   loadExistingDeployments,

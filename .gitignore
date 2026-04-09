@@ -16,3 +16,9 @@ package-lock.json
 
 **/.env*
 !**/.env.example
+
+.omp
+
+target
+
+**/accounts*.json

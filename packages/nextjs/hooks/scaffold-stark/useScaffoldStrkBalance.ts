@@ -1,12 +1,12 @@
-import { Address } from "@starknet-start/chains";
+import { useEffect, useState } from "react";
 import { useDeployedContractInfo } from "./useDeployedContractInfo";
-import { useReadContract } from "@starknet-start/react";
+import { useContractCall } from "~~/hooks/useStarkZap";
 import { BlockNumber } from "starknet";
 import { Abi } from "abi-wan-kanabi";
 import { formatUnits } from "ethers";
 
 type UseScaffoldStrkBalanceProps = {
-  address?: Address | string;
+  address?: `0x${string}` | string;
 };
 
 /**
@@ -22,29 +22,34 @@ type UseScaffoldStrkBalanceProps = {
  *   - symbol: string - Token symbol ("STRK")
  *   - formatted: string - Formatted balance as string, defaults to "0" if no data
  *   - error: Error | null - Any error encountered during the read operation
- *   - (All other properties from useReadContract)
+ *   - isLoading: boolean - Whether the balance is being fetched
  * @see {@link https://scaffoldstark.com/docs/hooks/useScaffoldStrkBalance}
  */
 
 const useScaffoldStrkBalance = ({ address }: UseScaffoldStrkBalanceProps) => {
   const { data: deployedContract } = useDeployedContractInfo("Strk");
 
-  const { data, ...props } = useReadContract({
-    functionName: "balance_of",
-    address: deployedContract?.address,
-    abi: deployedContract?.abi as Abi as any[],
-    watch: true,
-    enabled: true,
-    args: address ? [address] : [],
-    blockIdentifier: "latest" as BlockNumber,
-  });
+  const { data, isLoading, error, refetch } = useContractCall<bigint>(
+    deployedContract?.address,
+    deployedContract?.abi as Abi | undefined,
+    "balance_of",
+    address ? [address] : [],
+    { watch: true, enabled: !!address && !!deployedContract?.address },
+  );
+  // Convert u256 tuple [low, high] to bigint
+  const rawBalance = data as [string, string] | undefined;
+  const value: bigint | undefined = rawBalance
+    ? BigInt(rawBalance[0]) + BigInt(rawBalance[1]) * 2n ** 128n
+    : undefined;
 
   return {
-    value: data as unknown as bigint,
+    value,
     decimals: 18,
     symbol: "STRK",
-    formatted: data ? formatUnits(data as unknown as bigint) : "0",
-    ...props,
+    formatted: value ? formatUnits(value, 18) : "0",
+    isLoading,
+    error: error ? new Error(error) : null,
+    refetch,
   };
 };
 

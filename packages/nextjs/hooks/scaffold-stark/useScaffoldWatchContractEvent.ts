@@ -3,15 +3,15 @@ import {
   ContractName,
   UseScaffoldWatchContractEventConfig,
 } from "~~/utils/scaffold-stark/contract";
-import { ExtractAbiEventNames } from "abi-wan-kanabi/dist/kanabi";
+import { ExtractAbiEventNames } from "abi-wan-kanabi/kanabi";
 import { useEffect, useMemo, useState } from "react";
-import { useProvider } from "@starknet-start/react";
 import { useTargetNetwork } from "./useTargetNetwork";
 import { useScaffoldWebSocketEvents } from "./useScaffoldWebSocketEvents";
 import scaffoldConfig from "~~/scaffold.config";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
-import { Abi } from "abi-wan-kanabi/dist/kanabi";
+import { Abi } from "abi-wan-kanabi/kanabi";
 import { resolveEventAbi } from "~~/utils/scaffold-stark/eventsUtils";
+import { useSDKStore } from "~~/services/store/sdk";
 
 /**
  * Watches for specific contract events and triggers a callback when events are detected.
@@ -35,10 +35,11 @@ export const useScaffoldWatchContractEvent = <
   eventName,
   onLogs,
 }: UseScaffoldWatchContractEventConfig<TContractName, TEventName>) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
-  const { provider } = useProvider();
   const { targetNetwork } = useTargetNetwork();
+
+  // State for loading and error
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // Validate event existence in ABI to keep parity with previous behavior and tests
   const { data: deployedContractData, isLoading: deployedContractLoading } =
@@ -56,8 +57,7 @@ export const useScaffoldWatchContractEvent = <
   useEffect(() => {
     if (!deployedContractLoading && !deployedContractData) {
       setError(new Error("Contract not found"));
-    } else if (!deployedContractLoading) {
-      setError(undefined);
+      setError(null);
     }
   }, [deployedContractLoading, deployedContractData]);
 
@@ -87,26 +87,32 @@ export const useScaffoldWatchContractEvent = <
   useEffect(() => {
     if (!wsError) return;
     let stopped = false;
+    let id: ReturnType<typeof setInterval>;
     const tick = async () => {
       try {
         setIsLoading(true);
-        await provider; // touch provider to keep dependency
+        const sdk = useSDKStore.getState().getSDK();
+        sdk.getProvider(); // initialize provider
       } catch (e: any) {
         setError(e);
       } finally {
         if (!stopped) setIsLoading(false);
       }
     };
-    const id = setInterval(
-      tick,
-      targetNetwork ? scaffoldConfig.pollingInterval : 4000,
-    );
+    const startPolling = async () => {
+      await tick();
+      id = setInterval(
+        tick,
+        targetNetwork ? scaffoldConfig.pollingInterval : 4000,
+      );
+    };
+    startPolling();
     return () => {
       stopped = true;
       clearInterval(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wsError, provider, targetNetwork]);
+  }, [wsError, targetNetwork]);
 
   return { isLoading, error };
 };

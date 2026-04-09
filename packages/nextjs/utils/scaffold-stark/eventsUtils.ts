@@ -5,10 +5,7 @@ import {
   events as starknetEvents,
   createAbiParser,
 } from "starknet";
-import {
-  ExtractAbiEvent,
-  ExtractAbiEventNames,
-} from "abi-wan-kanabi/dist/kanabi";
+import { ExtractAbiEvent, ExtractAbiEventNames } from "abi-wan-kanabi/kanabi";
 import { ContractAbi, ContractName } from "./contract";
 
 export function resolveEventAbi<
