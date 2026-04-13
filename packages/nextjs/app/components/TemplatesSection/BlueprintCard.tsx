@@ -1,6 +1,6 @@
 "use client";
 
-import type { ScheduleTemplate } from "../../template-types";
+import { TEMPORAL_UNITS } from "../../template-types";
 import { useTemplateStore } from "../../store/templateStore";
 
 const CURVES = [
@@ -26,7 +26,10 @@ export function BlueprintCard({
 }: BlueprintCardProps) {
   const item = template.items[0];
   const curveData = CURVES.find((c) => c.key === item.curve) || CURVES[0];
-  const durationInDays = item.duration / 86400;
+  const factor =
+    TEMPORAL_UNITS.find((u) => u.key === item.durationUnit)?.factor || 86400;
+  const durationInSeconds = item.duration * factor;
+  const durationInDays = durationInSeconds / 86400;
   const setAppliedTemplate = useTemplateStore((s) => s.setAppliedTemplate);
 
   const handleApply = () => {
