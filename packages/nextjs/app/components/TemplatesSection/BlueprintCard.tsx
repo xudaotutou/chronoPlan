@@ -1,6 +1,6 @@
 "use client";
 
-import { TEMPORAL_UNITS } from "../../template-types";
+import { TEMPORAL_UNITS, type ScheduleTemplate } from "../../template-types";
 import { useTemplateStore } from "../../store/templateStore";
 
 const CURVES = [
